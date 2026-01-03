@@ -1,8 +1,5 @@
-package Enum;
-/**
- * Represents the type of parking zone.
- * Zone type affects pricing and access rules.
- */
+package Model.Enum;
+
 public enum ZoneType {
     STANDARD,
     EV,
