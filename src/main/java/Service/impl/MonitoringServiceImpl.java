@@ -1,7 +1,7 @@
 package Service.impl;
 
 import Model.*;
-import Model.Enum.BlacklistStatus;
+import Enum.BlacklistStatus;
 import Service.MonitoringService;
 
 import java.time.Duration;

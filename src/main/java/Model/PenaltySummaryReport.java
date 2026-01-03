@@ -1,6 +1,6 @@
 package Model;
 
-import Model.Enum.PenaltyType;
+import Enum.PenaltyType;
 
 import java.math.BigDecimal;
 import java.util.List;

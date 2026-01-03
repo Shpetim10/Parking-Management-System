@@ -1,4 +1,4 @@
-package Model.Enum;
+package Enum;
 
 public enum ZoneType {
     STANDARD,

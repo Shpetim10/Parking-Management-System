@@ -1,7 +1,7 @@
 package Model;
 
-import Model.Enum.SpotState;
-import Model.Enum.ZoneType;
+import Enum.SpotState;
+import Enum.ZoneType;
 
 public class ParkingSpot {
 

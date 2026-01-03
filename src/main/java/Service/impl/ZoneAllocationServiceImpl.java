@@ -3,7 +3,7 @@ package Service.impl;
 import Model.ParkingSpot;
 import Model.ParkingZone;
 import Model.SpotAssignmentRequest;
-import Model.Enum.ZoneType;
+import Enum.ZoneType;
 import Service.ZoneAllocationService;
 
 import java.util.List;

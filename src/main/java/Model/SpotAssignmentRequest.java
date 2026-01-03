@@ -1,6 +1,6 @@
 package Model;
 
-import Model.Enum.ZoneType;
+import Enum.ZoneType;
 
 import java.time.Instant;
 
