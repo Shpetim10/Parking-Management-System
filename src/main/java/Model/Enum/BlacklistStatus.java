@@ -1,4 +1,4 @@
-package Model;
+package Enum;
 
 /**
  * Represents blacklist evaluation status of a user.

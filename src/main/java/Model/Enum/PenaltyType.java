@@ -1,4 +1,4 @@
-package Model;
+package Enum;
 
 /**
  * Represents the type of penalty applied to a user.

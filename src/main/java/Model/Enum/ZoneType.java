@@ -1,4 +1,4 @@
-package Model;
+package Enum;
 /**
  * Represents the type of parking zone.
  * Zone type affects pricing and access rules.

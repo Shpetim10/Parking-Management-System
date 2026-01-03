@@ -1,4 +1,4 @@
-package Model;
+package Enum;
 /**
  * Represents the current state of a parking spot.
  */
