@@ -11,17 +11,20 @@ public class Tariff {
     private final boolean overnightFlatRateEnabled;
     private final BigDecimal overnightFlatRate;
 
+    private final BigDecimal weekendOrHolidaySurchargePercent;
+
     public Tariff(ZoneType zoneType,
                   BigDecimal baseHourlyRate,
                   BigDecimal dailyCap,
                   boolean overnightFlatRateEnabled,
-                  BigDecimal overnightFlatRate) {
+                  BigDecimal overnightFlatRate, BigDecimal weekendOrHolidaySurchargePercent) {
 
         this.zoneType = Objects.requireNonNull(zoneType, "zoneType must not be null");
         this.baseHourlyRate = requireNonNegative(baseHourlyRate, "baseHourlyRate");
         this.dailyCap = requireNonNegativeOrNull(dailyCap, "dailyCap");
 
         this.overnightFlatRateEnabled = overnightFlatRateEnabled;
+        this.weekendOrHolidaySurchargePercent = weekendOrHolidaySurchargePercent;
 
         if (overnightFlatRateEnabled) {
             // if flag is true, rate must be provided and non-negative
@@ -68,5 +71,9 @@ public class Tariff {
 
     public BigDecimal getOvernightFlatRate() {
         return overnightFlatRate;
+    }
+
+    public BigDecimal getWeekendOrHolidaySurchargePercent() {
+        return weekendOrHolidaySurchargePercent;
     }
 }
