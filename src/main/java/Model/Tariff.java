@@ -35,6 +35,17 @@ public class Tariff {
         }
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Tariff tariff)) return false;
+        return overnightFlatRateEnabled == tariff.overnightFlatRateEnabled && zoneType == tariff.zoneType && Objects.equals(baseHourlyRate, tariff.baseHourlyRate) && Objects.equals(dailyCap, tariff.dailyCap) && Objects.equals(overnightFlatRate, tariff.overnightFlatRate) && Objects.equals(weekendOrHolidaySurchargePercent, tariff.weekendOrHolidaySurchargePercent);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(zoneType, baseHourlyRate, dailyCap, overnightFlatRateEnabled, overnightFlatRate, weekendOrHolidaySurchargePercent);
+    }
+
     private static BigDecimal requireNonNegative(BigDecimal value, String fieldName) {
         Objects.requireNonNull(value, fieldName + " must not be null");
         if (value.signum() < 0) {

@@ -20,6 +20,17 @@ public class BillingResult {
         this.finalPriceRounded = requireNonNegative(finalPriceRounded, "finalPriceRounded");
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof BillingResult that)) return false;
+        return Objects.equals(basePrice, that.basePrice) && Objects.equals(discountsTotal, that.discountsTotal) && Objects.equals(penaltiesTotal, that.penaltiesTotal) && Objects.equals(finalPriceRounded, that.finalPriceRounded);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(basePrice, discountsTotal, penaltiesTotal, finalPriceRounded);
+    }
+
     private static BigDecimal requireNonNegative(BigDecimal value, String fieldName) {
         Objects.requireNonNull(value, fieldName + " must not be null");
         if (value.signum() < 0) {

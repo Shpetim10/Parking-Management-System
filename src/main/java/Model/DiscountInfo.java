@@ -31,6 +31,17 @@ public class DiscountInfo {
         this.freeHoursPerDay = freeHoursPerDay;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof DiscountInfo that)) return false;
+        return subscriptionHasFreeHours == that.subscriptionHasFreeHours && freeHoursPerDay == that.freeHoursPerDay && Objects.equals(subscriptionDiscountPercent, that.subscriptionDiscountPercent) && Objects.equals(promoDiscountPercent, that.promoDiscountPercent) && Objects.equals(promoDiscountFixed, that.promoDiscountFixed);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(subscriptionDiscountPercent, promoDiscountPercent, promoDiscountFixed, subscriptionHasFreeHours, freeHoursPerDay);
+    }
+
     private static BigDecimal normalizePercent(BigDecimal value, String fieldName) {
         if (value == null) {
             return BigDecimal.ZERO;
