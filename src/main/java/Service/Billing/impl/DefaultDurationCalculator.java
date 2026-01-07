@@ -20,6 +20,9 @@ public class DefaultDurationCalculator implements DurationCalculator {
         if (maxDurationHours <= 0) {
             throw new IllegalArgumentException("maxDurationHours must be > 0");
         }
+        if (maxDurationHours >24) {
+            throw new IllegalArgumentException("maxDurationHours must be <=24");
+        }
         if (exitTime.isBefore(entryTime)) {
             throw new IllegalArgumentException("exitTime must not be before entryTime");
         }

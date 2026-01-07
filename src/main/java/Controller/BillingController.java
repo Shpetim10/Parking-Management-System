@@ -12,7 +12,7 @@ import Service.Billing.BillingService;
 import java.math.BigDecimal;
 import java.util.Objects;
 
-public final class BillingController {
+public class BillingController {
 
     private final BillingService billingService;
     private final TariffRepository tariffRepository;
@@ -32,9 +32,6 @@ public final class BillingController {
         this.billingRecordRepository = Objects.requireNonNull(billingRecordRepository);
     }
 
-    /**
-     * Calculates a bill, stores it, and returns a DTO for the caller.
-     */
     public BillingResponse calculateBill(BillingRequest request) {
         Objects.requireNonNull(request, "request must not be null");
 

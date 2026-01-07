@@ -53,15 +53,11 @@ public class DefaultBillingService implements BillingService {
         Objects.requireNonNull(discountInfo, "discountInfo must not be null");
         Objects.requireNonNull(penalties, "penalties must not be null");
 
-        // 1) Calculate duration
+        //Calculate duration
         DurationInfo durationInfo = durationCalculator.calculateDuration(entryTime, exitTime, maxDurationHours);
         int durationHours = durationInfo.hours();
 
-        // NOTE: durationInfo.exceededMax() is not directly used here;
-        // overstay behavior (extra penalties) is handled externally by Person C
-        // and should be passed in via the 'penalties' parameter.
-
-        // 2) Calculate base price
+        //Calculate base price
         BigDecimal basePrice = pricingService.calculateBasePrice(
                 durationHours,
                 zoneType,
@@ -72,7 +68,7 @@ public class DefaultBillingService implements BillingService {
                 dynamicConfig
         );
 
-        // 3) Apply discounts, penalties, and cap to get final price
+        //Apply discounts, penalties, and cap to get final price
         BigDecimal finalPrice = discountAndCapService.applyDiscountAndCaps(
                 basePrice,
                 discountInfo,
@@ -80,7 +76,7 @@ public class DefaultBillingService implements BillingService {
                 maxPriceCap
         );
 
-        // 4) Compute discountsTotal: base + penalties - final
+        //Compute discountsTotal: base + penalties - final
         BigDecimal basePlusPenalties = basePrice.add(penalties);
         BigDecimal discountsTotal = basePlusPenalties.subtract(finalPrice);
         if (discountsTotal.signum() < 0) {

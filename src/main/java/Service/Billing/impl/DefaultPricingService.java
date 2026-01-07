@@ -4,11 +4,13 @@ import Model.DynamicPricingConfig;
 import Model.Tariff;
 import Service.Billing.PricingService;
 import Enum.*;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Objects;
 
 public class DefaultPricingService implements PricingService {
+
     @Override
     public BigDecimal calculateBasePrice(double durationHours,
                                          ZoneType zoneType,
@@ -17,6 +19,29 @@ public class DefaultPricingService implements PricingService {
                                          double occupancyRatio,
                                          Tariff tariff,
                                          DynamicPricingConfig config) {
+
+        validateInputs(durationHours, occupancyRatio, zoneType, dayType, timeOfDayBand, tariff, config);
+
+        if (durationHours == 0.0) {
+            return BigDecimal.ZERO.setScale(4, RoundingMode.HALF_UP);
+        }
+
+        BigDecimal price = calculateBase(durationHours, tariff);
+        price = applyTimeOfDayMultiplier(price, timeOfDayBand, config);
+        price = applyHighOccupancySurge(price, occupancyRatio, config);
+        price = applyWeekendOrHolidaySurcharge(price, dayType, tariff);
+        price = applyDailyCap(price, tariff.getDailyCap());
+
+        return price.setScale(4, RoundingMode.HALF_UP);
+    }
+
+    private void validateInputs(double durationHours,
+                                double occupancyRatio,
+                                ZoneType zoneType,
+                                DayType dayType,
+                                TimeOfDayBand timeOfDayBand,
+                                Tariff tariff,
+                                DynamicPricingConfig config) {
 
         Objects.requireNonNull(zoneType, "zoneType must not be null");
         Objects.requireNonNull(dayType, "dayType must not be null");
@@ -31,46 +56,51 @@ public class DefaultPricingService implements PricingService {
                 || occupancyRatio < 0.0 || occupancyRatio > 1.0) {
             throw new IllegalArgumentException("occupancyRatio must be between 0.0 and 1.0 inclusive");
         }
-
-        // No time parked -> 0 cost
-        if (durationHours == 0.0) {
-            return BigDecimal.ZERO.setScale(4, RoundingMode.HALF_UP);
-        }
-
-        BigDecimal hours = BigDecimal.valueOf(durationHours);
-        BigDecimal price = tariff.getBaseHourlyRate().multiply(hours);
-
-        // 1) Time-of-day multiplier
-        BigDecimal timeMultiplier = (timeOfDayBand == TimeOfDayBand.PEAK)
-                ? BigDecimal.valueOf(config.getPeakHourMultiplier())
-                : BigDecimal.valueOf(config.getOffPeakMultiplier());
-        price = price.multiply(timeMultiplier);
-
-        // 2) High-occupancy surge
-        if (occupancyRatio >= config.getHighOccupancyThreshold()) {
-            BigDecimal surgeMultiplier = BigDecimal.valueOf(config.getHighOccupancyMultiplier());
-            price = price.multiply(surgeMultiplier);
-        }
-
-        // 3) Weekend/Holiday surcharge
-        if (dayType == DayType.WEEKEND || dayType == DayType.HOLIDAY) {
-            BigDecimal surchargePercent = getWeekendOrHolidaySurchargePercent(tariff);
-            if (surchargePercent.signum() > 0) {
-                BigDecimal onePlus = BigDecimal.ONE.add(surchargePercent);
-                price = price.multiply(onePlus);
-            }
-        }
-
-        // 4) Daily/session cap
-        BigDecimal dailyCap = tariff.getDailyCap();
-        if (dailyCap != null && dailyCap.signum() > 0 && price.compareTo(dailyCap) > 0) {
-            price = dailyCap;
-        }
-
-        // Keep some precision; final 2-decimal rounding happens later.
-        return price.setScale(4, RoundingMode.HALF_UP);
     }
 
+    private BigDecimal calculateBase(double durationHours, Tariff tariff) {
+        BigDecimal hours = BigDecimal.valueOf(durationHours);
+        return tariff.getBaseHourlyRate().multiply(hours);
+    }
+
+    private BigDecimal applyTimeOfDayMultiplier(BigDecimal price,
+                                                TimeOfDayBand band,
+                                                DynamicPricingConfig config) {
+        double multiplier = (band == TimeOfDayBand.PEAK)
+                ? config.getPeakHourMultiplier()
+                : config.getOffPeakMultiplier();
+        return price.multiply(BigDecimal.valueOf(multiplier));
+    }
+
+    private BigDecimal applyHighOccupancySurge(BigDecimal price,
+                                               double occupancyRatio,
+                                               DynamicPricingConfig config) {
+        if (occupancyRatio >= config.getHighOccupancyThreshold()) {
+            return price.multiply(BigDecimal.valueOf(config.getHighOccupancyMultiplier()));
+        }
+        return price;
+    }
+
+    private BigDecimal applyWeekendOrHolidaySurcharge(BigDecimal price,
+                                                      DayType dayType,
+                                                      Tariff tariff) {
+        if (dayType != DayType.WEEKEND && dayType != DayType.HOLIDAY) {
+            return price;
+        }
+        BigDecimal surchargePercent = getWeekendOrHolidaySurchargePercent(tariff);
+        if (surchargePercent.signum() <= 0) {
+            return price;
+        }
+        BigDecimal factor = BigDecimal.ONE.add(surchargePercent);
+        return price.multiply(factor);
+    }
+
+    private BigDecimal applyDailyCap(BigDecimal price, BigDecimal dailyCap) {
+        if (dailyCap == null || dailyCap.signum() <= 0) {
+            return price;
+        }
+        return (price.compareTo(dailyCap) > 0) ? dailyCap : price;
+    }
 
     private BigDecimal getWeekendOrHolidaySurchargePercent(Tariff tariff) {
         BigDecimal s = tariff.getWeekendOrHolidaySurchargePercent();

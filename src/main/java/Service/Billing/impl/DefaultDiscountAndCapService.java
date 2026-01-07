@@ -24,37 +24,37 @@ public class DefaultDiscountAndCapService implements DiscountAndCapService {
             throw new IllegalArgumentException("maxPriceCap must not be negative");
         }
 
-        // 1) Start amount = base + penalties
+        //Start amount = base + penalties
         BigDecimal amount = basePrice.add(penalties);
 
-        // 2) Subscription percent discount
+        //Subscription percent discount
         if (discountInfo.hasSubscriptionPercentDiscount()) {
             BigDecimal subDiscount = amount.multiply(discountInfo.getSubscriptionDiscountPercent());
             amount = amount.subtract(subDiscount);
         }
 
-        // 3) Promo percent discount
+        //Promo percent discount
         if (discountInfo.hasPromoPercentDiscount()) {
             BigDecimal promoPercentDiscount = amount.multiply(discountInfo.getPromoDiscountPercent());
             amount = amount.subtract(promoPercentDiscount);
         }
 
-        // 4) Promo fixed discount
+        //Promo fixed discount
         if (discountInfo.hasPromoFixedDiscount()) {
             amount = amount.subtract(discountInfo.getPromoDiscountFixed());
         }
 
-        // 5) Clamp lower bound to 0
+        //Clamp lower bound to 0
         if (amount.signum() < 0) {
             amount = BigDecimal.ZERO;
         }
 
-        // 6) Apply cap if configured
+        //Apply cap if configured
         if (maxPriceCap != null && amount.compareTo(maxPriceCap) > 0) {
             amount = maxPriceCap;
         }
 
-        // 7) Final rounding to 2 decimal places (currency)
+        //Final rounding to 2 decimal places
         return amount.setScale(2, RoundingMode.HALF_UP);
     }
 }
