@@ -1,4 +1,15 @@
 package Dto.Penalty;
 
-public class ApplyPenaltyRequestDto {
-}
+import Enum.PenaltyType;
+
+import java.math.BigDecimal;
+import java.time.Instant;
+
+public record ApplyPenaltyRequestDto(
+        String userId,
+        PenaltyType type,
+        BigDecimal amount,
+        Instant timestamp,
+        int maxPenaltiesAllowed,
+        java.time.Duration window
+) { }

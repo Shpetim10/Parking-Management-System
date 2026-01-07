@@ -1,4 +1,7 @@
 package Dto.Penalty;
 
-public class PenaltyCalculationResponseDto {
-}
+import java.math.BigDecimal;
+
+public record PenaltyCalculationResponseDto(
+        BigDecimal totalPenalty
+) { }

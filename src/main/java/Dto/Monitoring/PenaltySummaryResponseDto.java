@@ -1,4 +1,10 @@
 package Dto.Monitoring;
 
-public class PenaltySummaryResponseDto {
-}
+import java.math.BigDecimal;
+
+public record PenaltySummaryResponseDto(
+        BigDecimal totalOverstay,
+        BigDecimal totalLostTicket,
+        BigDecimal totalMisuse,
+        int blacklistCandidatesCount
+) { }

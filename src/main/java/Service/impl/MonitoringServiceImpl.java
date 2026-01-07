@@ -1,13 +1,15 @@
 package Service.impl;
 
-import Model.*;
 import Enum.BlacklistStatus;
+import Enum.ZoneType;
+import Model.*;
 import Service.MonitoringService;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+
 
 public class MonitoringServiceImpl implements MonitoringService {
 
@@ -56,6 +58,22 @@ public class MonitoringServiceImpl implements MonitoringService {
         }
 
         return PenaltySummaryReport.from(histories);
+    }
+
+
+    @Override
+    public ZoneOccupancyReport generateZoneReport(
+            ZoneType zoneType,
+            double averageOccupancy,
+            int totalReservations,
+            int noShowReservations
+    ) {
+        return new ZoneOccupancyReport(
+                zoneType,
+                averageOccupancy,
+                totalReservations,
+                noShowReservations
+        );
     }
 
     public List<LogEvent> getLogs() {

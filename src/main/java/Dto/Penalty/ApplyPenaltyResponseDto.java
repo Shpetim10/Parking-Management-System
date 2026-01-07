@@ -1,4 +1,12 @@
 package Dto.Penalty;
 
-public class ApplyPenaltyResponseDto {
-}
+import Enum.BlacklistStatus;
+
+import java.math.BigDecimal;
+
+public record ApplyPenaltyResponseDto(
+        String userId,
+        BigDecimal newTotalPenaltyAmount,
+        int penaltyCount,
+        BlacklistStatus blacklistStatus
+) { }

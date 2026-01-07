@@ -1,4 +1,10 @@
 package Dto.Monitoring;
 
-public class ZoneOccupancyReportResponseDto {
-}
+import Enum.ZoneType;
+
+public record ZoneOccupancyReportResponseDto(
+        ZoneType zoneType,
+        double averageOccupancy,
+        int totalReservations,
+        int noShowReservations
+) { }

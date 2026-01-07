@@ -1,4 +1,4 @@
-package Dto;
+package Dto.Zone;
 
 import Enum.SpotState;
 import Enum.ZoneType;
