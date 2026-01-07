@@ -8,5 +8,7 @@ public record BillingResponse(
         BigDecimal basePrice,
         BigDecimal discountsTotal,
         BigDecimal penaltiesTotal,
+        BigDecimal netPrice,
+        BigDecimal taxAmount,
         BigDecimal finalPrice
 ) { }

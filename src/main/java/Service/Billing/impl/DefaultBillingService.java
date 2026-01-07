@@ -4,10 +4,7 @@ import Model.BillingResult;
 import Model.DiscountInfo;
 import Model.DynamicPricingConfig;
 import Model.Tariff;
-import Service.Billing.BillingService;
-import Service.Billing.DiscountAndCapService;
-import Service.Billing.DurationCalculator;
-import Service.Billing.PricingService;
+import Service.Billing.*;
 import Enum.*;
 import Record.DurationInfo;
 
@@ -20,13 +17,15 @@ public class DefaultBillingService implements BillingService {
     private final DurationCalculator durationCalculator;
     private final PricingService pricingService;
     private final DiscountAndCapService discountAndCapService;
+    private final TaxService taxService;
 
     public DefaultBillingService(DurationCalculator durationCalculator,
                                  PricingService pricingService,
-                                 DiscountAndCapService discountAndCapService) {
+                                 DiscountAndCapService discountAndCapService, TaxService taxService) {
         this.durationCalculator = Objects.requireNonNull(durationCalculator, "durationCalculator must not be null");
         this.pricingService = Objects.requireNonNull(pricingService, "pricingService must not be null");
         this.discountAndCapService = Objects.requireNonNull(discountAndCapService, "discountAndCapService must not be null");
+        this.taxService = taxService;
     }
 
     @Override
@@ -41,23 +40,14 @@ public class DefaultBillingService implements BillingService {
                                        DiscountInfo discountInfo,
                                        BigDecimal penalties,
                                        int maxDurationHours,
-                                       BigDecimal maxPriceCap) {
+                                       BigDecimal maxPriceCap,
+                                       BigDecimal taxRate) {
 
-        Objects.requireNonNull(entryTime, "entryTime must not be null");
-        Objects.requireNonNull(exitTime, "exitTime must not be null");
-        Objects.requireNonNull(zoneType, "zoneType must not be null");
-        Objects.requireNonNull(dayType, "dayType must not be null");
-        Objects.requireNonNull(timeOfDayBand, "timeOfDayBand must not be null");
-        Objects.requireNonNull(tariff, "tariff must not be null");
-        Objects.requireNonNull(dynamicConfig, "dynamicConfig must not be null");
-        Objects.requireNonNull(discountInfo, "discountInfo must not be null");
-        Objects.requireNonNull(penalties, "penalties must not be null");
-
-        //Calculate duration
+        //duration
         DurationInfo durationInfo = durationCalculator.calculateDuration(entryTime, exitTime, maxDurationHours);
         int durationHours = durationInfo.hours();
 
-        //Calculate base price
+        //base price
         BigDecimal basePrice = pricingService.calculateBasePrice(
                 durationHours,
                 zoneType,
@@ -68,27 +58,35 @@ public class DefaultBillingService implements BillingService {
                 dynamicConfig
         );
 
-        //Apply discounts, penalties, and cap to get final price
-        BigDecimal finalPrice = discountAndCapService.applyDiscountAndCaps(
+        //discounts and caps
+        BigDecimal netPrice = discountAndCapService.applyDiscountAndCaps(
                 basePrice,
                 discountInfo,
                 penalties,
                 maxPriceCap
         );
 
-        //Compute discountsTotal: base + penalties - final
+        //compute total discount
         BigDecimal basePlusPenalties = basePrice.add(penalties);
-        BigDecimal discountsTotal = basePlusPenalties.subtract(finalPrice);
+        BigDecimal discountsTotal = basePlusPenalties.subtract(netPrice);
         if (discountsTotal.signum() < 0) {
             discountsTotal = BigDecimal.ZERO;
         }
+
+        //VAT/tax
+        BigDecimal taxAmount = taxService.calculateTax(netPrice, taxRate);
+        BigDecimal grossPrice = netPrice.add(taxAmount);
+
 
         return new BillingResult(
                 basePrice,
                 discountsTotal,
                 penalties,
-                finalPrice
+                netPrice,
+                taxAmount,
+                grossPrice
         );
+
     }
 
     @Override

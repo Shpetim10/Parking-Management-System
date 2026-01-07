@@ -18,5 +18,6 @@ public record BillingRequest(
         LocalDateTime exitTime,
         BigDecimal penalties,
         int maxDurationHours,
-        BigDecimal maxPriceCap
+        BigDecimal maxPriceCap,
+        BigDecimal taxRate
 ) { }

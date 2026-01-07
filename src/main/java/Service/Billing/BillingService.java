@@ -21,7 +21,9 @@ public interface BillingService {
                                 DiscountInfo discountInfo,
                                 BigDecimal penalties,
                                 int maxDurationHours,
-                                BigDecimal maxPriceCap);
+                                BigDecimal maxPriceCap,
+                                BigDecimal taxRate
+                                );
 
     DurationInfo calculateDuration(LocalDateTime entryTime,
                                    LocalDateTime exitTime,

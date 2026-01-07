@@ -40,6 +40,8 @@ public class BillingController {
         DiscountInfo discountInfo = discountPolicyRepository.findDiscountForUser(request.userId());
 
         BigDecimal penalties = request.penalties() != null ? request.penalties() : BigDecimal.ZERO;
+        BigDecimal maxPriceCap = request.maxPriceCap() != null ? request.maxPriceCap() : null;
+        BigDecimal taxRate = request.taxRate() != null ? request.taxRate() : BigDecimal.ZERO;
 
         BillingResult result = billingService.calculateBill(
                 request.entryTime(),
@@ -53,7 +55,8 @@ public class BillingController {
                 discountInfo,
                 penalties,
                 request.maxDurationHours(),
-                request.maxPriceCap()
+                maxPriceCap,
+                taxRate
         );
 
         BillingRecord record = new BillingRecord(
@@ -72,7 +75,9 @@ public class BillingController {
                 result.getBasePrice(),
                 result.getDiscountsTotal(),
                 result.getPenaltiesTotal(),
-                result.getFinalPriceRounded()
+                result.getNetPrice(),
+                result.getTaxAmount(),
+                result.getFinalPrice()
         );
     }
 }
