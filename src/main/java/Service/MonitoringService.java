@@ -12,9 +12,7 @@ public interface MonitoringService {
     BlacklistStatus updatePenaltyHistoryAndCheckBlacklist(
             String userId,
             Penalty newPenalty,
-            PenaltyHistory history,
-            int maxPenaltiesAllowed,
-            Duration window
+            PenaltyHistory history
     );
 
     void logEvent(LogEvent event);

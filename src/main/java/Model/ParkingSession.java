@@ -31,4 +31,12 @@ public class ParkingSession {
     public String getVehiclePlate() {
         return vehiclePlate;
     }
+
+    public String getId() {
+        return id;
+    }
+
+    public Object getUserId() {
+        return userId;
+    }
 }

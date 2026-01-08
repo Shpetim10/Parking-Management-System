@@ -57,9 +57,13 @@ public class MonitoringController {
 
         ParkingZone zone = parkingZoneRepository.findById(dto.zoneId());
 
+        double averageOccupancy = dto.totalTimeSlotsObserved() == 0
+                ? 0.0
+                : (double) dto.totalReservations() / (double) dto.totalTimeSlotsObserved();
+
         ZoneOccupancyReport report = monitoringService.generateZoneReport(
                 zone.getZoneType(),
-                dto.totalTimeSlotsObserved(),
+                averageOccupancy,
                 dto.totalReservations(),
                 dto.noShowReservations()
         );

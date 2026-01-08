@@ -6,7 +6,6 @@ import Repository.ParkingSessionRepository;
 
 import java.util.*;
 import java.util.stream.Collectors;
-
 public class InMemoryParkingSessionRepository implements ParkingSessionRepository {
 
     private final Map<String, ParkingSession> sessions = new HashMap<>();
@@ -20,8 +19,8 @@ public class InMemoryParkingSessionRepository implements ParkingSessionRepositor
     public List<ParkingSession> findActiveSessionsForUser(String userId) {
         return sessions.values().stream()
                 .filter(s -> s.getState() == SessionState.OPEN)
-                .filter(s -> s.getVehiclePlate().equals(userId) == false)
-                .collect(Collectors.toList());
+                .filter(s -> s.getUserId().equals(userId))
+                .toList();
     }
 
     @Override
@@ -29,11 +28,11 @@ public class InMemoryParkingSessionRepository implements ParkingSessionRepositor
         return sessions.values().stream()
                 .filter(s -> s.getState() == SessionState.OPEN)
                 .filter(s -> s.getVehiclePlate().equals(plate))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
     public void save(ParkingSession session) {
-        sessions.put(session.getVehiclePlate(), session);
+        sessions.put(session.getId(), session); // ✅ FIX
     }
 }

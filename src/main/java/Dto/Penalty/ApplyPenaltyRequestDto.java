@@ -9,7 +9,5 @@ public record ApplyPenaltyRequestDto(
         String userId,
         PenaltyType type,
         BigDecimal amount,
-        Instant timestamp,
-        int maxPenaltiesAllowed,
-        java.time.Duration window
+        Instant timestamp
 ) { }

@@ -12,9 +12,13 @@ import Service.MonitoringService;
 import Service.PenaltyService;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.util.Objects;
 
 public class PenaltyController {
+
+    private static final int MAX_PENALTIES_ALLOWED = 3;
+    private static final Duration BLACKLIST_WINDOW = Duration.ofDays(30);
 
     private final PenaltyService penaltyService;
     private final MonitoringService monitoringService;
@@ -57,9 +61,7 @@ public class PenaltyController {
         BlacklistStatus status = monitoringService.updatePenaltyHistoryAndCheckBlacklist(
                 dto.userId(),
                 penalty,
-                history,
-                dto.maxPenaltiesAllowed(),
-                dto.window()
+                history
         );
 
         penaltyHistoryRepository.save(dto.userId(), history);
