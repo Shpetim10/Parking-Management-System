@@ -1,7 +1,7 @@
-package Service.Billing.impl;
+package Service.impl;
 
 import Model.DiscountInfo;
-import Service.Billing.DiscountAndCapService;
+import Service.DiscountAndCapService;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

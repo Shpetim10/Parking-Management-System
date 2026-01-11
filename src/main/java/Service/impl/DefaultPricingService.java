@@ -1,8 +1,8 @@
-package Service.Billing.impl;
+package Service.impl;
 
 import Model.DynamicPricingConfig;
 import Model.Tariff;
-import Service.Billing.PricingService;
+import Service.PricingService;
 import Enum.*;
 
 import java.math.BigDecimal;

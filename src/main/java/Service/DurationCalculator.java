@@ -1,4 +1,4 @@
-package Service.Billing;
+package Service;
 
 import java.time.LocalDateTime;
 import Record.DurationInfo;

@@ -1,6 +1,6 @@
-package Service.Billing.impl;
+package Service.impl;
 
-import Service.Billing.TaxService;
+import Service.TaxService;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

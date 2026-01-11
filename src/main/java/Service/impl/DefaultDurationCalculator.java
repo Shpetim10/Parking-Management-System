@@ -1,6 +1,6 @@
-package Service.Billing.impl;
+package Service.impl;
 
-import Service.Billing.DurationCalculator;
+import Service.DurationCalculator;
 
 import Record.DurationInfo;
 

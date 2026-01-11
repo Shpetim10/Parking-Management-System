@@ -1,10 +1,10 @@
-package Service.Billing.impl;
+package Service.impl;
 
 import Model.BillingResult;
 import Model.DiscountInfo;
 import Model.DynamicPricingConfig;
 import Model.Tariff;
-import Service.Billing.*;
+import Service.*;
 import Enum.*;
 import Record.DurationInfo;
 

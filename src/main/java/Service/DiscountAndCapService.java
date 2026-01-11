@@ -1,4 +1,4 @@
-package Service.Billing;
+package Service;
 
 import Model.DiscountInfo;
 
