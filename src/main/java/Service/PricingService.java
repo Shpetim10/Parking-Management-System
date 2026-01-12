@@ -7,8 +7,7 @@ import Enum.*;
 import java.math.BigDecimal;
 
 public interface PricingService {
-    BigDecimal calculateBasePrice(double durationHours,
-                                  ZoneType zoneType,
+    BigDecimal calculateBasePrice(int durationHours,
                                   DayType dayType,
                                   TimeOfDayBand timeOfDayBand,
                                   double occupancyRatio,   // 0.0–1.0

@@ -9,7 +9,10 @@ import java.util.Objects;
 
 public class DefaultDiscountAndCapService implements DiscountAndCapService {
     @Override
-    public BigDecimal applyDiscountAndCaps(BigDecimal basePrice, DiscountInfo discountInfo, BigDecimal penalties, BigDecimal maxPriceCap) {
+    public BigDecimal applyDiscountAndCaps(BigDecimal basePrice,
+                                           DiscountInfo discountInfo,
+                                           BigDecimal penalties,
+                                           BigDecimal maxPriceCap) {
         Objects.requireNonNull(basePrice, "basePrice must not be null");
         Objects.requireNonNull(discountInfo, "discountInfo must not be null");
         Objects.requireNonNull(penalties, "penalties must not be null");

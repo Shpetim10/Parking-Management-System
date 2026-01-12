@@ -12,15 +12,14 @@ import java.util.Objects;
 public class DefaultPricingService implements PricingService {
 
     @Override
-    public BigDecimal calculateBasePrice(double durationHours,
-                                         ZoneType zoneType,
+    public BigDecimal calculateBasePrice(int durationHours,
                                          DayType dayType,
                                          TimeOfDayBand timeOfDayBand,
                                          double occupancyRatio,
                                          Tariff tariff,
                                          DynamicPricingConfig config) {
 
-        validateInputs(durationHours, occupancyRatio, zoneType, dayType, timeOfDayBand, tariff, config);
+        validateInputs(durationHours, occupancyRatio,dayType, timeOfDayBand, tariff, config);
 
         if (durationHours == 0.0) {
             return BigDecimal.ZERO.setScale(4, RoundingMode.HALF_UP);
@@ -35,25 +34,22 @@ public class DefaultPricingService implements PricingService {
         return price.setScale(4, RoundingMode.HALF_UP);
     }
 
-    private void validateInputs(double durationHours,
+    private void validateInputs(int durationHours,
                                 double occupancyRatio,
-                                ZoneType zoneType,
                                 DayType dayType,
                                 TimeOfDayBand timeOfDayBand,
                                 Tariff tariff,
                                 DynamicPricingConfig config) {
 
-        Objects.requireNonNull(zoneType, "zoneType must not be null");
         Objects.requireNonNull(dayType, "dayType must not be null");
         Objects.requireNonNull(timeOfDayBand, "timeOfDayBand must not be null");
         Objects.requireNonNull(tariff, "tariff must not be null");
         Objects.requireNonNull(config, "config must not be null");
 
-        if (Double.isNaN(durationHours) || Double.isInfinite(durationHours) || durationHours < 0.0) {
+        if (durationHours < 0.0) {
             throw new IllegalArgumentException("durationHours must be a finite value >= 0.0");
         }
-        if (Double.isNaN(occupancyRatio) || Double.isInfinite(occupancyRatio)
-                || occupancyRatio < 0.0 || occupancyRatio > 1.0) {
+        if (occupancyRatio < 0.0 || occupancyRatio > 1.0) {
             throw new IllegalArgumentException("occupancyRatio must be between 0.0 and 1.0 inclusive");
         }
     }

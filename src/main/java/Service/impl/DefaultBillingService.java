@@ -50,7 +50,6 @@ public class DefaultBillingService implements BillingService {
         //base price
         BigDecimal basePrice = pricingService.calculateBasePrice(
                 durationHours,
-                zoneType,
                 dayType,
                 timeOfDayBand,
                 occupancyRatio,
