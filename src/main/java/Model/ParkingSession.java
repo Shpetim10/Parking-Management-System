@@ -2,6 +2,7 @@ package Model;
 
 import Enum.SessionState;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class ParkingSession {
@@ -9,10 +10,10 @@ public class ParkingSession {
     private final String id;
     private final String userId;
     private final String vehiclePlate;
-    private final Instant startTime;
+    private final LocalDateTime startTime;
     private SessionState state;
 
-    public ParkingSession(String id, String userId, String vehiclePlate, Instant startTime) {
+    public ParkingSession(String id, String userId, String vehiclePlate, LocalDateTime startTime) {
         this.id = Objects.requireNonNull(id);
         this.userId = Objects.requireNonNull(userId);
         this.vehiclePlate = Objects.requireNonNull(vehiclePlate);
@@ -36,7 +37,11 @@ public class ParkingSession {
         return id;
     }
 
-    public Object getUserId() {
+    public String getUserId() {
         return userId;
+    }
+
+    public LocalDateTime getStartTime() {
+        return startTime;
     }
 }

@@ -7,6 +7,7 @@ import Service.MonitoringService;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,7 +27,7 @@ public class MonitoringServiceImpl implements MonitoringService {
     ) {
         history.addPenalty(newPenalty);
 
-        Instant cutoff = Instant.now().minus(BLACKLIST_WINDOW);
+        LocalDateTime cutoff = LocalDateTime.now().minus(BLACKLIST_WINDOW);
 
         long penaltiesInWindow = history.getPenalties().stream()
                 .filter(p -> p.getTimestamp().isAfter(cutoff))

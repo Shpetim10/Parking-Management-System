@@ -10,4 +10,6 @@ public final class Settings {
     public final static BigDecimal MAX_PENALTIES_ALLOWED = new BigDecimal(3);
     public final static Duration BLACKLIST_TIME_WINDOW= Duration.ofDays(30);
 
+    public final static BigDecimal MAX_PRICE_CAPACITY = new BigDecimal(String.valueOf(1000000)); //1 million
+    public final static BigDecimal TAX_RATIO= new BigDecimal(String.valueOf(0.2));
 }

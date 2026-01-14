@@ -3,15 +3,15 @@ package Model;
 import Enum.PenaltyType;
 
 import java.math.BigDecimal;
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 public class Penalty {
 
     private final PenaltyType type;
     private final BigDecimal amount;
-    private final Instant timestamp;
+    private final LocalDateTime timestamp;
 
-    public Penalty(PenaltyType type, BigDecimal amount, Instant timestamp) {
+    public Penalty(PenaltyType type, BigDecimal amount, LocalDateTime timestamp) {
         if (type == null) {
             throw new IllegalArgumentException("Penalty type cannot be null");
         }
@@ -35,7 +35,7 @@ public class Penalty {
         return amount;
     }
 
-    public Instant getTimestamp() {
+    public LocalDateTime getTimestamp() {
         return timestamp;
     }
 }
