@@ -2,6 +2,7 @@ package Service;
 
 import Model.*;
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 public interface EligibilityService {
 
@@ -14,6 +15,6 @@ public interface EligibilityService {
             double hoursUsedToday,
             SubscriptionPlan plan,
             boolean hasUnpaidSessions,
-            Instant now
+            LocalDateTime now
     );
 }

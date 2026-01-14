@@ -6,6 +6,7 @@ import Enum.UserStatus;
 
 import java.time.DayOfWeek;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 
 public class EligibilityServiceImpl implements EligibilityService {
@@ -20,7 +21,7 @@ public class EligibilityServiceImpl implements EligibilityService {
             double hoursUsedToday,
             SubscriptionPlan plan,
             boolean hasUnpaidSessions,
-            Instant now
+            LocalDateTime now
     ) {
 
         if (user.getStatus() != UserStatus.ACTIVE)

@@ -2,204 +2,316 @@ import Controller.*;
 import Dto.Billing.*;
 import Dto.Eligibility.*;
 import Dto.Exit.*;
+import Dto.Monitoring.*;
 import Dto.Penalty.*;
-import Dto.Zone.SpotAssignmentRequestDto;
+import Dto.Zone.*;
 import Enum.*;
 import Model.*;
 import Repository.impl.*;
+import Service.impl.*;
 import Service.impl.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Map;
+import java.util.*;
 
+public class Main {
 
-    public class Main {
+    private static final Scanner scanner = new Scanner(System.in);
 
-        public static void main(String[] args) {
+    public static void main(String[] args) {
 
-            // ----------------------------
-            // 1. Repositories
-            // ----------------------------
-            var userRepo = new InMemoryUserRepository();
-            var vehicleRepo = new InMemoryVehicleRepository();
-            var sessionRepo = new InMemoryParkingSessionRepository();
-            var zoneRepo = new InMemoryParkingZoneRepository(new ArrayList<>());
-            var penaltyRepo = new InMemoryPenaltyHistoryRepository();
+        // ===============================
+        // Infrastructure
+        // ===============================
+        var userRepo = new InMemoryUserRepository();
+        var vehicleRepo = new InMemoryVehicleRepository();
+        var sessionRepo = new InMemoryParkingSessionRepository();
+        var zoneRepo = new InMemoryParkingZoneRepository(new ArrayList<>());
+        var penaltyRepo = new InMemoryPenaltyHistoryRepository();
+        var billingRepo = new InMemoryBillingRecordRepository();
 
-            var discountRepo = new InMemoryDiscountPolicyRepository(
-                    new DiscountInfo(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, false, 0)
-            );
+        var discountRepo = new InMemoryDiscountPolicyRepository(
+                new DiscountInfo(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, false, 0)
+        );
 
-            var tariffRepo = new InMemoryTariffRepository(Map.of(
-                    ZoneType.STANDARD,
-                    new Tariff(
-                            ZoneType.STANDARD,
-                            BigDecimal.valueOf(3),
-                            BigDecimal.valueOf(20),
-                            false,
-                            null,
-                            BigDecimal.valueOf(0.1)
-                    )
-            ));
+        var tariffRepo = new InMemoryTariffRepository(Map.of(
+                ZoneType.STANDARD,
+                new Tariff(
+                        ZoneType.STANDARD,
+                        BigDecimal.valueOf(3),
+                        BigDecimal.valueOf(25),
+                        false,
+                        null,
+                        BigDecimal.valueOf(0.10)
+                )
+        ));
 
-            var pricingConfigRepo = new InMemoryDynamicPricingConfigRepository(
-                    new DynamicPricingConfig(1.5, 1.0, 0.7, 1.2)
-            );
+        var pricingConfigRepo = new InMemoryDynamicPricingConfigRepository(
+                new DynamicPricingConfig(1.5, 1.0, 0.7, 1.2)
+        );
 
-            // ----------------------------
-            // 2. Services
-            // ----------------------------
-            var eligibilityService = new EligibilityServiceImpl();
-            var zoneService = new ZoneAllocationServiceImpl();
-            var penaltyService = new PenaltyServiceImpl();
-            var monitoringService = new MonitoringServiceImpl();
-            var exitService = new ExitAuthorizationServiceImpl();
+        // ===============================
+        // Services
+        // ===============================
+        var eligibilityService = new EligibilityServiceImpl();
+        var zoneService = new ZoneAllocationServiceImpl();
+        var penaltyService = new PenaltyServiceImpl();
+        var monitoringService = new MonitoringServiceImpl();
+        var exitService = new ExitAuthorizationServiceImpl();
 
-            var billingService = new DefaultBillingService(
-                    new DefaultDurationCalculator(),
-                    new DefaultPricingService(),
-                    new DefaultDiscountAndCapService(),
-                    new DefaultTaxService()
-            );
+        var billingService = new DefaultBillingService(
+                new DefaultDurationCalculator(),
+                new DefaultPricingService(),
+                new DefaultDiscountAndCapService(),
+                new DefaultTaxService()
+        );
 
-            // ----------------------------
-            // 3. Controllers
-            // ----------------------------
-            var eligibilityController = new EligibilityController(
-                    eligibilityService,
-                    userRepo,
-                    vehicleRepo,
-                    userId -> new SubscriptionPlan(
-                            2, 1, 5, 8,
-                            false, null, null,
-                            false
-                    )
-            );
+        // ===============================
+        // Controllers
+        // ===============================
+        var eligibilityController = new EligibilityController(
+                eligibilityService,
+                userRepo,
+                vehicleRepo,
+                userId -> new SubscriptionPlan(
+                        2, 1, 5, 8,
+                        false, null, null,
+                        false
+                )
+        );
 
-            var zoneController = new ZoneAllocationController(zoneService, zoneRepo);
-            var billingController = new BillingController(
-                    billingService,
-                    tariffRepo,
-                    pricingConfigRepo,
-                    discountRepo,
-                    new InMemoryBillingRecordRepository()
-            );
+        var zoneController = new ZoneAllocationController(zoneService, zoneRepo);
+        var billingController = new BillingController(
+                billingService,
+                tariffRepo,
+                pricingConfigRepo,
+                discountRepo,
+                billingRepo
+        );
 
-            var penaltyController = new PenaltyController(
-                    penaltyService,
-                    monitoringService,
-                    penaltyRepo
-            );
+        var penaltyController = new PenaltyController(
+                penaltyService,
+                monitoringService,
+                penaltyRepo
+        );
 
-            var exitController = new ExitAuthorizationController(
-                    exitService,
-                    userRepo,
-                    sessionRepo
-            );
+        var exitController = new ExitAuthorizationController(
+                exitService,
+                userRepo,
+                sessionRepo
+        );
 
-            // ----------------------------
-            // 4. Setup Data
-            // ----------------------------
-            var user = new User("U1", UserStatus.ACTIVE);
-            var vehicle = new Vehicle("AA-123", "U1");
+        var monitoringController = new MonitoringController(
+                monitoringService,
+                penaltyRepo,
+                zoneRepo
+        );
 
-            userRepo.save(user);
-            vehicleRepo.save(vehicle);
+        // ===============================
+        // Initial zones
+        // ===============================
+        var zone = new ParkingZone("Z1", ZoneType.STANDARD, 0.9);
+        zone.addSpot(new ParkingSpot("S-1", ZoneType.STANDARD));
+        zone.addSpot(new ParkingSpot("S-2", ZoneType.STANDARD));
+        zoneRepo.save(zone);
 
-            var zone = new ParkingZone("Z1", ZoneType.STANDARD, 0.9);
-            zone.addSpot(new ParkingSpot("S-1", ZoneType.STANDARD));
-            zoneRepo.save(zone);
+        // ===============================
+        // Runtime state
+        // ===============================
+        ParkingSession activeSession = null;
 
-            System.out.println("✅ User and vehicle registered");
+        // ===============================
+        // Console loop
+        // ===============================
+        while (true) {
+            printMenu();
+            int choice = readInt("Choose option");
 
-            // ----------------------------
-            // 5. Eligibility Check
-            // ----------------------------
-            var eligibility = eligibilityController.checkEligibility(
-                    new EligibilityRequestDto(
-                            "U1", "AA-123",
-                            0, 0, 0, 0,
-                            false,
-                            Instant.now()
-                    )
-            );
+            switch (choice) {
 
-            System.out.println("Eligibility allowed: " + eligibility.allowed());
-            if (!eligibility.allowed()) return;
+                case 1 -> {
+                    String userId = read("User ID");
+                    String plate = read("Vehicle plate");
+                    userRepo.save(new User(userId, UserStatus.ACTIVE));
+                    vehicleRepo.save(new Vehicle(plate, userId));
+                    System.out.println("✅ User and vehicle registered");
+                }
 
-            // ----------------------------
-            // 6. Spot Assignment
-            // ----------------------------
-            var spotResponse = zoneController.assignSpot(
-                    new SpotAssignmentRequestDto(
-                            "U1", ZoneType.STANDARD,
-                            false, false,
-                            Instant.now(),
-                            0.4
-                    )
-            );
+                case 2 -> {
+                    String userId = read("User ID");
+                    String plate = read("Vehicle plate");
 
-            System.out.println("🅿️ Spot assigned: " + spotResponse.spotId());
+                    try {
+                        var result = eligibilityController.checkEligibility(
+                                new EligibilityRequestDto(
+                                        userId, plate,
+                                        sessionRepo.getActiveSessionsCountForVehicle(plate),
+                                        sessionRepo.getActiveSessionsCountForUser(userId),
+                                        sessionRepo.getSessionsCountForToday(userId),
+                                        sessionRepo.getHoursUsedTodayForUser(userId),
+                                        sessionRepo.hasUnpaidSessionsForUser(userId),
+                                        LocalDateTime.now()
+                                )
+                        );
+                        System.out.println("Eligibility allowed: " + result.allowed());
+                        if (!result.allowed()) {
+                            System.out.println("Reason: " + result.reason());
+                        }
+                    }catch (Exception e) {
+                        System.out.println("Reason: " + e.getMessage());
+                    }
+                }
 
-            // ----------------------------
-            // 7. Start Session
-            // ----------------------------
-            var session = new ParkingSession("S1", "U1", "AA-123", Instant.now());
-            session.setState(SessionState.PAID);
-            sessionRepo.save(session);
+                case 3 -> {
+                    String userId = read("User ID");
+                    var response = zoneController.assignSpot(
+                            new SpotAssignmentRequestDto(
+                                    userId,
+                                    ZoneType.STANDARD,
+                                    false,
+                                    false,
+                                    Instant.now(),
+                                    0.3
+                            )
+                    );
 
-            System.out.println("🚗 Parking session started");
+                    if (response == null) {
+                        System.out.println("❌ No spot available");
+                    } else {
+                        System.out.println("🅿️ Spot assigned: " + response.spotId());
+                    }
+                }
 
-            // ----------------------------
-            // 8. Billing
-            // ----------------------------
-            var billing = billingController.calculateBill(
-                    new BillingRequest(
-                            "S1",
-                            "U1",
-                            ZoneType.STANDARD,
-                            DayType.WEEKDAY,
-                            TimeOfDayBand.PEAK,
-                            0.4,
-                            LocalDateTime.now().minusHours(3),
-                            LocalDateTime.now(),
-                            BigDecimal.ZERO,
-                            24,
-                            BigDecimal.valueOf(20),
-                            BigDecimal.valueOf(0.2)
-                    )
-            );
+                case 4 -> {
+                    String sessionId = UUID.randomUUID().toString();
+                    String userId = read("User ID");
+                    String plate = read("Vehicle plate");
 
-            System.out.println("💰 Billing completed");
-            System.out.println("Base price: " + billing.basePrice());
-            System.out.println("Final price: " + billing.finalPrice());
+                    activeSession = new ParkingSession(
+                            sessionId,
+                            userId,
+                            plate,
+                            LocalDateTime.now()
+                    );
+                    activeSession.setState(SessionState.PAID);
+                    sessionRepo.save(activeSession);
 
-            // ----------------------------
-            // 9. Apply Penalty
-            // ----------------------------
-            var penaltyResult = penaltyController.applyPenalty(
-                    new ApplyPenaltyRequestDto(
-                            "U1",
-                            PenaltyType.OVERSTAY,
-                            BigDecimal.valueOf(5),
-                            Instant.now()
-                    )
-            );
+                    System.out.println("🚗 Parking session started");
+                    System.out.println("Session ID: " + sessionId);
+                }
 
-            System.out.println("⚠️ Penalty applied");
-            System.out.println("Total penalties: " + penaltyResult.newTotalPenaltyAmount());
+                case 5 -> {
+                    if (activeSession == null) {
+                        System.out.println("❌ No active session");
+                        break;
+                    }
 
-            // ----------------------------
-            // 10. Exit Authorization
-            // ----------------------------
-            var exit = exitController.authorizeExit(
-                    new ExitAuthorizationRequestDto("U1", "S1", "AA-123")
-            );
+                    var bill = billingController.calculateBill(
+                            new BillingRequest(
+                                    activeSession.getId(),
+                                    activeSession.getVehiclePlate(),
+                                    ZoneType.STANDARD,
+                                    DayType.WEEKDAY,
+                                    TimeOfDayBand.PEAK,
+                                    0.3,
+                                    activeSession.getStartTime(),
+                                    LocalDateTime.now(),
+                                    BigDecimal.ZERO,
+                                    24,
+                                    BigDecimal.valueOf(25),
+                                    BigDecimal.valueOf(0.2)
+                            )
+                    );
 
-            System.out.println("🚦 Exit allowed: " + exit.allowed());
-            System.out.println("Exit reason: " + exit.reason());
+                    System.out.println("💰 Billing complete");
+                    System.out.println("Final price: " + bill.finalPrice());
+                }
+
+                case 6 -> {
+                    String userId = read("User ID");
+                    var penalty = penaltyController.applyPenalty(
+                            new ApplyPenaltyRequestDto(
+                                    userId,
+                                    PenaltyType.OVERSTAY,
+                                    BigDecimal.valueOf(5),
+                                    Instant.now()
+                            )
+                    );
+
+                    System.out.println("⚠️ Penalty applied");
+                    System.out.println("Total penalties: " + penalty.newTotalPenaltyAmount());
+                    System.out.println("Blacklist status: " + penalty.blacklistStatus());
+                }
+
+                case 7 -> {
+                    if (activeSession == null) {
+                        System.out.println("❌ No active session");
+                        break;
+                    }
+
+                    try {
+                        var exit = exitController.authorizeExit(
+                                new ExitAuthorizationRequestDto(
+                                        activeSession.getUserId(),
+                                        activeSession.getId(),
+                                        activeSession.getVehiclePlate()
+                                )
+                        );
+
+                        System.out.println("🚦 Exit allowed: " + exit.allowed());
+                        System.out.println("Reason: " + exit.reason());
+                    }catch (Exception e) {
+                        System.out.println("Reason: " + e.getMessage());
+                    }
+                }
+
+                case 8 -> {
+                    var summary = monitoringController.generatePenaltySummary();
+                    System.out.println("📊 Monitoring summary");
+                    System.out.println("Overstay penalties: " + summary.totalOverstay());
+                }
+
+                case 9 -> {
+                    System.out.println("👋 Exiting system");
+                    return;
+                }
+
+                default -> System.out.println("❌ Invalid option");
+            }
+
+            System.out.println();
         }
     }
+
+    // ===============================
+    // Helpers
+    // ===============================
+    private static void printMenu() {
+        System.out.println("""
+                ===========================
+                PARKING MANAGEMENT SYSTEM
+                ===========================
+                1. Register user & vehicle
+                2. Check eligibility
+                3. Assign parking spot
+                4. Start parking session
+                5. Calculate billing
+                6. Apply penalty
+                7. Exit parking
+                8. View monitoring summary
+                9. Exit
+                """);
+    }
+
+    private static String read(String label) {
+        System.out.print(label + ": ");
+        return scanner.nextLine().trim();
+    }
+
+    private static int readInt(String label) {
+        System.out.print(label + ": ");
+        return Integer.parseInt(scanner.nextLine().trim());
+    }
+}
