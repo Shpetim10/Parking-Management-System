@@ -9,7 +9,6 @@ import Enum.*;
 import Model.*;
 import Repository.impl.*;
 import Service.impl.*;
-import Service.impl.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -31,7 +30,7 @@ public class Main {
         var zoneRepo = new InMemoryParkingZoneRepository(new ArrayList<>());
         var penaltyRepo = new InMemoryPenaltyHistoryRepository();
         var billingRepo = new InMemoryBillingRecordRepository();
-
+        var subscriptionRepo= new InMemorySubscriptionPlanRepository();
         var discountRepo = new InMemoryDiscountPolicyRepository(
                 new DiscountInfo(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, false, 0)
         );
@@ -88,7 +87,10 @@ public class Main {
                 tariffRepo,
                 pricingConfigRepo,
                 discountRepo,
-                billingRepo
+                billingRepo,
+                sessionRepo,
+                penaltyRepo,
+                subscriptionRepo
         );
 
         var penaltyController = new PenaltyController(
@@ -143,24 +145,17 @@ public class Main {
                     String userId = read("User ID");
                     String plate = read("Vehicle plate");
 
-                    try {
-                        var result = eligibilityController.checkEligibility(
-                                new EligibilityRequestDto(
-                                        userId, plate,
-                                        sessionRepo.getActiveSessionsCountForVehicle(plate),
-                                        sessionRepo.getActiveSessionsCountForUser(userId),
-                                        sessionRepo.getSessionsCountForToday(userId),
-                                        sessionRepo.getHoursUsedTodayForUser(userId),
-                                        sessionRepo.hasUnpaidSessionsForUser(userId),
-                                        LocalDateTime.now()
-                                )
-                        );
-                        System.out.println("Eligibility allowed: " + result.allowed());
-                        if (!result.allowed()) {
-                            System.out.println("Reason: " + result.reason());
-                        }
-                    }catch (Exception e) {
-                        System.out.println("Reason: " + e.getMessage());
+                    var result = eligibilityController.checkEligibility(
+                            new EligibilityRequestDto(
+                                    userId, plate,
+                                    0, 0, 0, 0,
+                                    false,
+                                    LocalDateTime.now()
+                            )
+                    );
+                    System.out.println("Eligibility allowed: " + result.allowed());
+                    if (!result.allowed()) {
+                        System.out.println("Reason: " + result.reason());
                     }
                 }
 
@@ -203,30 +198,29 @@ public class Main {
                 }
 
                 case 5 -> {
-                    if (activeSession == null) {
-                        System.out.println("❌ No active session");
-                        break;
-                    }
+                    try{
+
+
+                    String sessionId = read("Session ID");
 
                     var bill = billingController.calculateBill(
                             new BillingRequest(
-                                    activeSession.getId(),
-                                    activeSession.getVehiclePlate(),
+                                    sessionId,
                                     ZoneType.STANDARD,
                                     DayType.WEEKDAY,
                                     TimeOfDayBand.PEAK,
                                     0.3,
-                                    activeSession.getStartTime(),
                                     LocalDateTime.now(),
                                     BigDecimal.ZERO,
-                                    24,
-                                    BigDecimal.valueOf(25),
-                                    BigDecimal.valueOf(0.2)
+                                    24
                             )
                     );
 
                     System.out.println("💰 Billing complete");
                     System.out.println("Final price: " + bill.finalPrice());
+                    }catch (Exception e){
+                        System.out.println(e.getMessage());
+                    }
                 }
 
                 case 6 -> {
@@ -251,20 +245,16 @@ public class Main {
                         break;
                     }
 
-                    try {
-                        var exit = exitController.authorizeExit(
-                                new ExitAuthorizationRequestDto(
-                                        activeSession.getUserId(),
-                                        activeSession.getId(),
-                                        activeSession.getVehiclePlate()
-                                )
-                        );
+                    var exit = exitController.authorizeExit(
+                            new ExitAuthorizationRequestDto(
+                                    activeSession.getUserId(),
+                                    activeSession.getVehiclePlate(),
+                                    activeSession.getVehiclePlate()
+                            )
+                    );
 
-                        System.out.println("🚦 Exit allowed: " + exit.allowed());
-                        System.out.println("Reason: " + exit.reason());
-                    }catch (Exception e) {
-                        System.out.println("Reason: " + e.getMessage());
-                    }
+                    System.out.println("🚦 Exit allowed: " + exit.allowed());
+                    System.out.println("Reason: " + exit.reason());
                 }
 
                 case 8 -> {
@@ -302,6 +292,8 @@ public class Main {
                 7. Exit parking
                 8. View monitoring summary
                 9. Exit
+                10. Add Discount Info
+                11. Register Subscription
                 """);
     }
 

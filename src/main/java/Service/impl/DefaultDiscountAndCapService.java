@@ -2,6 +2,7 @@ package Service.impl;
 
 import Model.DiscountInfo;
 import Service.DiscountAndCapService;
+import Settings.Settings;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -11,8 +12,7 @@ public class DefaultDiscountAndCapService implements DiscountAndCapService {
     @Override
     public BigDecimal applyDiscountAndCaps(BigDecimal basePrice,
                                            DiscountInfo discountInfo,
-                                           BigDecimal penalties,
-                                           BigDecimal maxPriceCap) {
+                                           BigDecimal penalties) {
         Objects.requireNonNull(basePrice, "basePrice must not be null");
         Objects.requireNonNull(discountInfo, "discountInfo must not be null");
         Objects.requireNonNull(penalties, "penalties must not be null");
@@ -22,9 +22,6 @@ public class DefaultDiscountAndCapService implements DiscountAndCapService {
         }
         if (penalties.signum() < 0) {
             throw new IllegalArgumentException("penalties must not be negative");
-        }
-        if (maxPriceCap != null && maxPriceCap.signum() < 0) {
-            throw new IllegalArgumentException("maxPriceCap must not be negative");
         }
 
         //Start amount = base + penalties
@@ -53,8 +50,8 @@ public class DefaultDiscountAndCapService implements DiscountAndCapService {
         }
 
         //Apply cap if configured
-        if (maxPriceCap != null && amount.compareTo(maxPriceCap) > 0) {
-            amount = maxPriceCap;
+        if (amount.compareTo(Settings.MAX_PRICE_CAPACITY) > 0) {
+            amount = Settings.MAX_PRICE_CAPACITY;
         }
 
         //Final rounding to 2 decimal places

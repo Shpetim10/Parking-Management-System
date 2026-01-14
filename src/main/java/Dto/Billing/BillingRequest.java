@@ -9,15 +9,11 @@ import java.time.LocalDateTime;
 
 public record BillingRequest(
         String sessionId,
-        String userId,
         ZoneType zoneType,
         DayType dayType,
         TimeOfDayBand timeOfDayBand,
         double occupancyRatio,
-        LocalDateTime entryTime,
         LocalDateTime exitTime,
         BigDecimal penalties,
-        int maxDurationHours,
-        BigDecimal maxPriceCap,
-        BigDecimal taxRate
+        int maxDurationHours
 ) { }

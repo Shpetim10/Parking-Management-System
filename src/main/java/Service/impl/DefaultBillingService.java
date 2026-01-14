@@ -1,9 +1,6 @@
 package Service.impl;
 
-import Model.BillingResult;
-import Model.DiscountInfo;
-import Model.DynamicPricingConfig;
-import Model.Tariff;
+import Model.*;
 import Service.*;
 import Enum.*;
 import Record.DurationInfo;
@@ -61,8 +58,7 @@ public class DefaultBillingService implements BillingService {
         BigDecimal netPrice = discountAndCapService.applyDiscountAndCaps(
                 basePrice,
                 discountInfo,
-                penalties,
-                maxPriceCap
+                penalties
         );
 
         //compute total discount

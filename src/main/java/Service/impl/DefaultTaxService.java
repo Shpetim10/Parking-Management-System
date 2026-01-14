@@ -1,6 +1,7 @@
 package Service.impl;
 
 import Service.TaxService;
+import Settings.Settings;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -20,6 +21,10 @@ public class DefaultTaxService implements TaxService {
         }
         if (taxRate.signum() < 0 || taxRate.compareTo(BigDecimal.ONE) > 0) {
             throw new IllegalArgumentException("taxRate must be between 0 and 1");
+        }
+
+        if(netAmount.compareTo(Settings.MAX_PRICE_CAPACITY) < 0) {
+            netAmount = Settings.MAX_PRICE_CAPACITY;
         }
 
         BigDecimal tax = netAmount.multiply(taxRate);
