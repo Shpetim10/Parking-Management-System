@@ -22,16 +22,16 @@ public class DefaultPricingService implements PricingService {
         validateInputs(durationHours, occupancyRatio,dayType, timeOfDayBand, tariff, config);
 
         if (durationHours == 0.0) {
-            return BigDecimal.ZERO.setScale(4, RoundingMode.HALF_UP);
+            return BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
         }
 
         BigDecimal price = calculateBase(durationHours, tariff);
         price = applyTimeOfDayMultiplier(price, timeOfDayBand, config);
         price = applyHighOccupancySurge(price, occupancyRatio, config);
         price = applyWeekendOrHolidaySurcharge(price, dayType, tariff);
-        price = applyDailyCap(price, tariff.getDailyCap());
+        price = applyDailyCap(price, tariff.getDailyCap(), durationHours);
 
-        return price.setScale(4, RoundingMode.HALF_UP);
+        return price.setScale(2, RoundingMode.HALF_UP);
     }
 
     private void validateInputs(int durationHours,
@@ -62,9 +62,10 @@ public class DefaultPricingService implements PricingService {
     private BigDecimal applyTimeOfDayMultiplier(BigDecimal price,
                                                 TimeOfDayBand band,
                                                 DynamicPricingConfig config) {
-        double multiplier = (band == TimeOfDayBand.PEAK)
-                ? config.getPeakHourMultiplier()
-                : config.getOffPeakMultiplier();
+        if (band == TimeOfDayBand.OFF_PEAK) return price;
+
+        double multiplier = config.getPeakHourMultiplier();
+
         return price.multiply(BigDecimal.valueOf(multiplier));
     }
 
@@ -91,10 +92,13 @@ public class DefaultPricingService implements PricingService {
         return price.multiply(factor);
     }
 
-    private BigDecimal applyDailyCap(BigDecimal price, BigDecimal dailyCap) {
+    private BigDecimal applyDailyCap(BigDecimal price, BigDecimal dailyCap, int durationHours) {
         if (dailyCap == null || dailyCap.signum() <= 0) {
             return price;
         }
+        // if duration is more than 24h
+        dailyCap = dailyCap.multiply(new BigDecimal(Math.ceil(durationHours/24.0)));
+
         return (price.compareTo(dailyCap) > 0) ? dailyCap : price;
     }
 

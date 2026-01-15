@@ -41,14 +41,12 @@ public class Main {
                         ZoneType.STANDARD,
                         BigDecimal.valueOf(3),
                         BigDecimal.valueOf(25),
-                        false,
-                        null,
                         BigDecimal.valueOf(0.10)
                 )
         ));
 
         var pricingConfigRepo = new InMemoryDynamicPricingConfigRepository(
-                new DynamicPricingConfig(1.5, 1.0, 0.7, 1.2)
+                new DynamicPricingConfig(1.5, 0.7, 1.2)
         );
 
         // ===============================
@@ -199,8 +197,6 @@ public class Main {
 
                 case 5 -> {
                     try{
-
-
                     String sessionId = read("Session ID");
 
                     var bill = billingController.calculateBill(
@@ -212,9 +208,7 @@ public class Main {
                                     0.3,
                                     LocalDateTime.now(),
                                     BigDecimal.ZERO,
-                                    24,
-                                    BigDecimal.valueOf(25),
-                                    BigDecimal.valueOf(0.2)
+                                    24
                             )
                     );
 
@@ -232,7 +226,7 @@ public class Main {
                                     userId,
                                     PenaltyType.OVERSTAY,
                                     BigDecimal.valueOf(5),
-                                    Instant.now()
+                                    LocalDateTime.now()
                             )
                     );
 

@@ -17,7 +17,6 @@ public class DynamicPricingController {
         DynamicPricingConfig config = configRepository.getActiveConfig();
         return new DynamicPricingConfigDto(
                 config.getPeakHourMultiplier(),
-                config.getOffPeakMultiplier(),
                 config.getHighOccupancyThreshold(),
                 config.getHighOccupancyMultiplier()
         );
@@ -27,7 +26,6 @@ public class DynamicPricingController {
         Objects.requireNonNull(dto, "dto must not be null");
         DynamicPricingConfig config = new DynamicPricingConfig(
                 dto.peakHourMultiplier(),
-                dto.offPeakMultiplier(),
                 dto.highOccupancyThreshold(),
                 dto.highOccupancyMultiplier()
         );

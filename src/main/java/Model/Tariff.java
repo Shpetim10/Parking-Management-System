@@ -8,42 +8,30 @@ public class Tariff {
     private final ZoneType zoneType;
     private final BigDecimal baseHourlyRate;
     private final BigDecimal dailyCap;
-    private final boolean overnightFlatRateEnabled;
-    private final BigDecimal overnightFlatRate;
 
     private final BigDecimal weekendOrHolidaySurchargePercent;
 
     public Tariff(ZoneType zoneType,
                   BigDecimal baseHourlyRate,
                   BigDecimal dailyCap,
-                  boolean overnightFlatRateEnabled,
-                  BigDecimal overnightFlatRate, BigDecimal weekendOrHolidaySurchargePercent) {
+                  BigDecimal weekendOrHolidaySurchargePercent) {
 
         this.zoneType = Objects.requireNonNull(zoneType, "zoneType must not be null");
         this.baseHourlyRate = requireNonNegative(baseHourlyRate, "baseHourlyRate");
         this.dailyCap = requireNonNegativeOrNull(dailyCap, "dailyCap");
 
-        this.overnightFlatRateEnabled = overnightFlatRateEnabled;
         this.weekendOrHolidaySurchargePercent = weekendOrHolidaySurchargePercent;
-
-        if (overnightFlatRateEnabled) {
-            // if flag is true, rate must be provided and non-negative
-            this.overnightFlatRate = requireNonNegative(overnightFlatRate, "overnightFlatRate");
-        } else {
-            // if flag is false, we ignore any provided value and store null
-            this.overnightFlatRate = null;
-        }
     }
 
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof Tariff tariff)) return false;
-        return overnightFlatRateEnabled == tariff.overnightFlatRateEnabled && zoneType == tariff.zoneType && Objects.equals(baseHourlyRate, tariff.baseHourlyRate) && Objects.equals(dailyCap, tariff.dailyCap) && Objects.equals(overnightFlatRate, tariff.overnightFlatRate) && Objects.equals(weekendOrHolidaySurchargePercent, tariff.weekendOrHolidaySurchargePercent);
+        return zoneType == tariff.zoneType && Objects.equals(baseHourlyRate, tariff.baseHourlyRate) && Objects.equals(dailyCap, tariff.dailyCap) && Objects.equals(weekendOrHolidaySurchargePercent, tariff.weekendOrHolidaySurchargePercent);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(zoneType, baseHourlyRate, dailyCap, overnightFlatRateEnabled, overnightFlatRate, weekendOrHolidaySurchargePercent);
+        return Objects.hash(zoneType, baseHourlyRate, dailyCap, weekendOrHolidaySurchargePercent);
     }
 
     private static BigDecimal requireNonNegative(BigDecimal value, String fieldName) {
@@ -74,14 +62,6 @@ public class Tariff {
 
     public BigDecimal getDailyCap() {
         return dailyCap;
-    }
-
-    public boolean isOvernightFlatRateEnabled() {
-        return overnightFlatRateEnabled;
-    }
-
-    public BigDecimal getOvernightFlatRate() {
-        return overnightFlatRate;
     }
 
     public BigDecimal getWeekendOrHolidaySurchargePercent() {

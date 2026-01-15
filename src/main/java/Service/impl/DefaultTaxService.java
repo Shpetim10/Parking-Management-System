@@ -23,7 +23,7 @@ public class DefaultTaxService implements TaxService {
             throw new IllegalArgumentException("taxRate must be between 0 and 1");
         }
 
-        if(netAmount.compareTo(Settings.MAX_PRICE_CAPACITY) < 0) {
+        if(netAmount.compareTo(Settings.MAX_PRICE_CAPACITY) > 0) {
             netAmount = Settings.MAX_PRICE_CAPACITY;
         }
 

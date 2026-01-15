@@ -22,8 +22,6 @@ public class TariffController {
                 tariff.getZoneType(),
                 tariff.getBaseHourlyRate(),
                 tariff.getDailyCap(),
-                tariff.isOvernightFlatRateEnabled(),
-                tariff.getOvernightFlatRate(),
                 tariff.getWeekendOrHolidaySurchargePercent()
         );
     }
@@ -34,8 +32,6 @@ public class TariffController {
                 dto.zoneType(),
                 dto.baseHourlyRate(),
                 dto.dailyCap(),
-                dto.overnightFlatRateEnabled(),
-                dto.overnightFlatRate(),
                 dto.weekendOrHolidaySurchargePercent()
         );
         tariffRepository.save(tariff);
