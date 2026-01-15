@@ -14,4 +14,13 @@ public interface ParkingSessionRepository {
     List<ParkingSession> findActiveSessionsForVehicle(String plate);
 
     void save(ParkingSession session);
+
+    void delete(ParkingSession session);
+
+    int getActiveSessionsCountForUser(String userId);
+    int getActiveSessionsCountForVehicle(String plate);
+    int getSessionsCountForToday(String userId);
+    int getHoursUsedTodayForUser(String userId);
+    boolean hasUnpaidSessionsForUser(String userId);
+
 }

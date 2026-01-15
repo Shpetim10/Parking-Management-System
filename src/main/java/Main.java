@@ -148,7 +148,7 @@ public class Main {
                                     userId, plate,
                                     0, 0, 0, 0,
                                     false,
-                                    Instant.now()
+                                    LocalDateTime.now()
                             )
                     );
                     System.out.println("Eligibility allowed: " + result.allowed());

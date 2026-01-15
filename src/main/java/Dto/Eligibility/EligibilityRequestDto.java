@@ -1,6 +1,7 @@
 package Dto.Eligibility;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 public record EligibilityRequestDto(
         String userId,
@@ -10,5 +11,5 @@ public record EligibilityRequestDto(
         int sessionsStartedToday,
         double hoursUsedToday,
         boolean hasUnpaidSessions,
-        Instant now
+        LocalDateTime now
 ) {}

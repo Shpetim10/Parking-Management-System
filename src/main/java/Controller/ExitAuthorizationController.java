@@ -34,6 +34,9 @@ public class ExitAuthorizationController {
                 dto.plateAtGate()
         );
 
+        if(decision.isAllowed())
+            sessionRepository.delete(session);
+
         return new ExitAuthorizationResponseDto(
                 decision.isAllowed(),
                 decision.getReason()
