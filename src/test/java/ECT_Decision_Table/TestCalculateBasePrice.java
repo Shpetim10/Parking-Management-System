@@ -15,6 +15,7 @@ import java.math.BigDecimal;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestCalculateBasePrice {
+    // Normal valid test cases
     @ParameterizedTest
     @CsvSource({
         "0, 0.5, OFF_PEAK, WEEKDAY, 0.00",
@@ -41,4 +42,6 @@ public class TestCalculateBasePrice {
                 config
         ));
     }
+
+    // Testing invalid cases
 }

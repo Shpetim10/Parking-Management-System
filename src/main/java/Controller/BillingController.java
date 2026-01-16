@@ -91,6 +91,7 @@ public class BillingController {
         );
         billingRecordRepository.save(record);
 
+        session.markPaid();
 
         return new BillingResponse(
                 request.sessionId(),
