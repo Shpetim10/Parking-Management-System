@@ -5,9 +5,7 @@ import Model.*;
 import Enum.UserStatus;
 
 import java.time.DayOfWeek;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 
 public class EligibilityServiceImpl implements EligibilityService {
 
@@ -42,17 +40,11 @@ public class EligibilityServiceImpl implements EligibilityService {
         if (hoursUsedToday >= plan.maxDailyHours)
             return EligibilityResult.denied("DAILY_HOURS_LIMIT_REACHED");
 
-        var localTime = now.atZone(ZoneId.systemDefault()).toLocalTime();
-        var day = now.atZone(ZoneId.systemDefault()).getDayOfWeek();
+        var day = now.getDayOfWeek();
 
         if (plan.weekdayOnly &&
                 (day == DayOfWeek.SATURDAY || day == DayOfWeek.SUNDAY))
             return EligibilityResult.denied("WEEKDAY_ONLY_PLAN");
-
-        if (plan.curfewRestricted &&
-                !localTime.isBefore(plan.curfewStart) &&
-                localTime.isBefore(plan.curfewEnd))
-            return EligibilityResult.denied("CURFEW_ACTIVE");
 
         return EligibilityResult.allowed();
     }

@@ -6,19 +6,19 @@ import Enum.ZoneType;
 public class ParkingSpot {
 
     private final String spotId;
-    private final ZoneType zoneType;
+    private final ParkingZone parkingZone;
     private SpotState state;
 
-    public ParkingSpot(String spotId, ZoneType zoneType) {
+    public ParkingSpot(String spotId, ParkingZone parkingZone) {
         if (spotId == null || spotId.isBlank()) {
             throw new IllegalArgumentException("Spot ID cannot be null or empty");
         }
-        if (zoneType == null) {
+        if (parkingZone == null) {
             throw new IllegalArgumentException("Zone type cannot be null");
         }
 
         this.spotId = spotId;
-        this.zoneType = zoneType;
+        this.parkingZone = parkingZone;
         this.state = SpotState.FREE;
     }
 
@@ -56,8 +56,8 @@ public class ParkingSpot {
         return spotId;
     }
 
-    public ZoneType getZoneType() {
-        return zoneType;
+    public ParkingZone getParkingZone() {
+        return parkingZone;
     }
 
     public SpotState getState() {

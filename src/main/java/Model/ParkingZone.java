@@ -3,6 +3,7 @@ package Model;
 import Enum.ZoneType;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ParkingZone {
@@ -32,7 +33,7 @@ public class ParkingZone {
         if (spot == null) {
             throw new IllegalArgumentException("Parking spot cannot be null");
         }
-        if (spot.getZoneType() != this.zoneType) {
+        if (spot.getParkingZone().getZoneType() != this.zoneType) {
             throw new IllegalArgumentException(
                     "Spot zone type does not match parking zone type"
             );
@@ -49,6 +50,10 @@ public class ParkingZone {
                 .filter(ParkingSpot::isFree)
                 .findFirst()
                 .orElse(null);
+    }
+
+    public List<ParkingSpot> getSpots() {
+        return Collections.unmodifiableList(spots);
     }
 
     public String getZoneId() {

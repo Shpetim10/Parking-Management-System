@@ -6,5 +6,6 @@ import Enum.ZoneType;
 public record SpotAssignmentResponseDto(
         String spotId,
         ZoneType zoneType,
-        SpotState state
-) { }
+        SpotState state,
+        String zoneId
+) {}

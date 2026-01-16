@@ -6,7 +6,7 @@ import Repository.ParkingSessionRepository;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
+
 public class InMemoryParkingSessionRepository implements ParkingSessionRepository {
 
     private final Map<String, ParkingSession> sessions = new HashMap<>();
@@ -17,9 +17,14 @@ public class InMemoryParkingSessionRepository implements ParkingSessionRepositor
     }
 
     @Override
+    public Collection<ParkingSession> findAll() {
+        return sessions.values();
+    }
+
+    @Override
     public List<ParkingSession> findActiveSessionsForUser(String userId) {
         return sessions.values().stream()
-                .filter(s -> s.getState() == SessionState.OPEN)
+                .filter(ParkingSession::isActive)
                 .filter(s -> s.getUserId().equals(userId))
                 .toList();
     }
@@ -27,7 +32,7 @@ public class InMemoryParkingSessionRepository implements ParkingSessionRepositor
     @Override
     public List<ParkingSession> findActiveSessionsForVehicle(String plate) {
         return sessions.values().stream()
-                .filter(s -> s.getState() == SessionState.OPEN)
+                .filter(ParkingSession::isActive)
                 .filter(s -> s.getVehiclePlate().equals(plate))
                 .toList();
     }
@@ -44,70 +49,55 @@ public class InMemoryParkingSessionRepository implements ParkingSessionRepositor
 
     @Override
     public int getActiveSessionsCountForUser(String userId) {
-        int cnt=0;
-        for(ParkingSession session : sessions.values()){
-            if(session.getUserId().equals(userId)){
-                cnt++;
-            }
-        }
-        return cnt;
+        return (int) sessions.values().stream()
+                .filter(ParkingSession::isActive)
+                .filter(s -> s.getUserId().equals(userId))
+                .count();
     }
 
     @Override
     public int getActiveSessionsCountForVehicle(String plate) {
-        int cnt=0;
-        for(ParkingSession session : sessions.values()){
-            if(session.getVehiclePlate().equals(plate)){
-                cnt++;
-            }
-        }
-        return cnt;
+        return (int) sessions.values().stream()
+                .filter(ParkingSession::isActive)
+                .filter(s -> s.getVehiclePlate().equals(plate))
+                .count();
     }
 
     @Override
     public int getSessionsCountForToday(String userId) {
-        int cnt=0;
-        for(ParkingSession session : sessions.values()){
-            if(session.getUserId().equals(userId)){
-                if(session.getStartTime().getDayOfYear()== LocalDateTime.now().getDayOfYear() &&
-                        session.getStartTime().getYear()== LocalDateTime.now().getYear()){
-                    cnt++;
-                }
-            }
-        }
-        return cnt;
+        LocalDateTime today = LocalDateTime.now();
+        return (int) sessions.values().stream()
+                .filter(s -> s.getUserId().equals(userId))
+                .filter(s -> s.getStartTime().toLocalDate().equals(today.toLocalDate()))
+                .count();
     }
 
     @Override
     public int getHoursUsedTodayForUser(String userId) {
-        LocalDateTime todayStart = LocalDateTime.now().toLocalDate().atStartOfDay();
-        LocalDateTime todayEnd = todayStart.plusDays(1);
+        LocalDateTime now = LocalDateTime.now();
+        int minutes = 0;
 
-        int totalMinutes = 0;
+        for (ParkingSession session : sessions.values()) {
+            if (session.getUserId().equals(userId)) {
+                LocalDateTime end = session.getEndTime() != null
+                        ? session.getEndTime()
+                        : now;
 
-        for(ParkingSession session : sessions.values()){
-            if(session.getUserId().equals(userId)){
-                if(session.getStartTime().isAfter(todayStart) && session.getStartTime().isBefore(todayEnd)){
-                    LocalDateTime start = session.getStartTime();
-                    LocalDateTime end = LocalDateTime.now();
-
-                    totalMinutes += (int)java.time.Duration.between(start, end).toMinutes();
-                }
+                minutes += java.time.Duration
+                        .between(session.getStartTime(), end)
+                        .toMinutes();
             }
         }
 
-        return (int)Math.ceil(totalMinutes/60.0);
+        return (int) Math.ceil(minutes / 60.0);
     }
 
     @Override
     public boolean hasUnpaidSessionsForUser(String userId) {
-        for (ParkingSession session : sessions.values()){
-            if(session.getUserId().equals(userId)){
-                if(session.getState() == SessionState.OPEN || session.getState() == SessionState.PAYMENT_PENDING){
-                    return true;
-                }
-            }
-        }
-        return false;
+        return sessions.values().stream()
+                .anyMatch(s ->
+                        s.getUserId().equals(userId) &&
+                                s.getState() == SessionState.OPEN
+                );
     }
 }

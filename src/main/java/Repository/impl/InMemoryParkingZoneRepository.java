@@ -1,5 +1,6 @@
 package Repository.impl;
 
+import Model.ParkingSpot;
 import Model.ParkingZone;
 import Repository.ParkingZoneRepository;
 
@@ -9,12 +10,13 @@ public class InMemoryParkingZoneRepository implements ParkingZoneRepository {
 
     private final Map<String, ParkingZone> zones = new HashMap<>();
 
-    public InMemoryParkingZoneRepository(List<ParkingZone> initialZones) {
-        if (initialZones != null) {
-            for (ParkingZone zone : initialZones) {
-                zones.put(zone.getZoneId(), zone);
-            }
-        }
+    public InMemoryParkingZoneRepository() {
+
+    }
+
+    @Override
+    public boolean zoneExists(String id) {
+        return zones.containsKey(id);
     }
 
     @Override
@@ -36,5 +38,39 @@ public class InMemoryParkingZoneRepository implements ParkingZoneRepository {
     public void save(ParkingZone zone) {
         Objects.requireNonNull(zone, "zone must not be null");
         zones.put(zone.getZoneId(), zone);
+    }
+
+    @Override
+    public boolean spotExists(String spotId) {
+        for(ParkingZone zone : zones.values()){
+            for (ParkingSpot spot: zone.getSpots()){
+                if(spot.getSpotId().equals(spotId)){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public ParkingZone findZoneById(String zoneId) {
+        for(ParkingZone zone : zones.values()){
+            if(zone.getZoneId().equals(zoneId)){
+                return zone;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public ParkingSpot findSpotById(String spotId) {
+        for(ParkingZone zone : zones.values()){
+            for (ParkingSpot spot: zone.getSpots()){
+                if(spot.getSpotId().equals(spotId)){
+                    return spot;
+                }
+            }
+        }
+        return null;
     }
 }

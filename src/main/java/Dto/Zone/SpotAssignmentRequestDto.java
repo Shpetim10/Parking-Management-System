@@ -1,14 +1,10 @@
 package Dto.Zone;
 
 import Enum.ZoneType;
-
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 public record SpotAssignmentRequestDto(
         String userId,
         ZoneType requestedZoneType,
-        boolean hasEvRights,
-        boolean hasVipRights,
-        Instant requestedStartTime,
-        double occupancyRatioForZone
-) { }
+        LocalDateTime requestedStartTime
+) {}

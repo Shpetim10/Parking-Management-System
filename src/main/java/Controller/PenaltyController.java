@@ -13,6 +13,8 @@ import Service.PenaltyService;
 
 import java.math.BigDecimal;
 import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Objects;
 
 public class PenaltyController {
@@ -50,19 +52,25 @@ public class PenaltyController {
 
         return new PenaltyCalculationResponseDto(total);
     }
-
     public ApplyPenaltyResponseDto applyPenalty(ApplyPenaltyRequestDto dto) {
         Objects.requireNonNull(dto, "dto must not be null");
 
         PenaltyHistory history = penaltyHistoryRepository.getOrCreate(dto.userId());
 
-        Penalty penalty = new Penalty(dto.type(), dto.amount(), dto.timestamp());
+        LocalDateTime timestamp = dto.timestamp();
 
-        BlacklistStatus status = monitoringService.updatePenaltyHistoryAndCheckBlacklist(
-                dto.userId(),
-                penalty,
-                history
+        Penalty penalty = new Penalty(
+                dto.type(),
+                dto.amount(),
+                timestamp
         );
+
+        BlacklistStatus status =
+                monitoringService.updatePenaltyHistoryAndCheckBlacklist(
+                        dto.userId(),
+                        penalty,
+                        history
+                );
 
         penaltyHistoryRepository.save(dto.userId(), history);
 

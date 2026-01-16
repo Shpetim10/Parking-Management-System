@@ -1,59 +1,32 @@
 package Service.impl;
 
+import Enum.ZoneType;
 import Model.ParkingSpot;
 import Model.ParkingZone;
 import Model.SpotAssignmentRequest;
-import Enum.ZoneType;
 import Service.ZoneAllocationService;
 
-import java.util.List;
+import java.util.Objects;
 
 public class ZoneAllocationServiceImpl implements ZoneAllocationService {
 
     @Override
-    public ParkingSpot assignSpot(
-            SpotAssignmentRequest request,
-            List<ParkingZone> zones,
-            double currentOccupancyRatioForZone
-    ) {
+    public ParkingSpot assignSpot(SpotAssignmentRequest request, ParkingZone zone) {
+        Objects.requireNonNull(request);
+        Objects.requireNonNull(zone);
 
-        if (request == null || zones == null) {
-            throw new IllegalArgumentException("Request and zones cannot be null");
-        }
+        if (!zone.getZoneType().equals(request.getRequestedZoneType())) return null;
+        if (zoneAccessDenied(request, zone.getZoneType())) return null;
+        if (!zone.hasFreeSpot()) return null;
 
-        for (ParkingZone zone : zones) {
-
-            if (!zone.getZoneType().equals(request.getRequestedZoneType())) {
-                continue;
-            }
-
-            if (zoneAccessDenied(request, zone.getZoneType())) {
-                continue;
-            }
-
-            if (currentOccupancyRatioForZone >= zone.getMaxOccupancyThreshold()) {
-                continue;
-            }
-
-            if (!zone.hasFreeSpot()) {
-                continue;
-            }
-
-            ParkingSpot spot = zone.getFirstFreeSpot();
-            spot.reserve();
-            return spot;
-        }
-
-        return null; // or throw NoAvailableSpotException
+        ParkingSpot spot = zone.getFirstFreeSpot();
+        spot.reserve();
+        return spot;
     }
 
     private boolean zoneAccessDenied(SpotAssignmentRequest request, ZoneType zoneType) {
-        if (zoneType == ZoneType.EV && !request.hasEvRights()) {
-            return true;
-        }
-        if (zoneType == ZoneType.VIP && !request.hasVipRights()) {
-            return true;
-        }
+        if (zoneType == ZoneType.EV && !request.getSubscriptionPlan().hasEvRights) return true;
+        if (zoneType == ZoneType.VIP && !request.getSubscriptionPlan().hasVipRights) return true;
         return false;
     }
 }
