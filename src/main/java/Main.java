@@ -50,15 +50,13 @@ public class Main {
                         ZoneType.STANDARD,
                         BigDecimal.valueOf(3),
                         BigDecimal.valueOf(25),
-                        false,
-                        null,
                         BigDecimal.valueOf(0.10)
                 )
         ));
 
         DynamicPricingConfigRepository pricingRepo =
                 new InMemoryDynamicPricingConfigRepository(
-                        new DynamicPricingConfig(1.5, 1.0, 0.7, 1.2)
+                        new DynamicPricingConfig(1.5, 1.0, 0.7)
                 );
 
         // ==========================================================
