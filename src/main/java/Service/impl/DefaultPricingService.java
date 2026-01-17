@@ -54,7 +54,10 @@ public class DefaultPricingService implements PricingService {
         }
     }
 
-    private BigDecimal calculateBase(double durationHours, Tariff tariff) {
+    private BigDecimal calculateBase(int durationHours, Tariff tariff) {
+        if(durationHours < 0 || tariff == null) {
+            return BigDecimal.ZERO.setScale(2);
+        }
         BigDecimal hours = BigDecimal.valueOf(durationHours);
         return tariff.getBaseHourlyRate().multiply(hours);
     }
@@ -62,6 +65,10 @@ public class DefaultPricingService implements PricingService {
     private BigDecimal applyTimeOfDayMultiplier(BigDecimal price,
                                                 TimeOfDayBand band,
                                                 DynamicPricingConfig config) {
+        if(price == null || band == null || config==null) {
+            return BigDecimal.ZERO.setScale(2);
+        }
+
         if (band == TimeOfDayBand.OFF_PEAK) return price;
 
         double multiplier = config.getPeakHourMultiplier();
@@ -72,6 +79,10 @@ public class DefaultPricingService implements PricingService {
     private BigDecimal applyHighOccupancySurge(BigDecimal price,
                                                double occupancyRatio,
                                                DynamicPricingConfig config) {
+        if (price == null || occupancyRatio < 0 || occupancyRatio>1 || config == null) {
+            return BigDecimal.ZERO.setScale(2);
+        }
+
         if (occupancyRatio >= config.getHighOccupancyThreshold()) {
             return price.multiply(BigDecimal.valueOf(config.getHighOccupancyMultiplier()));
         }
@@ -81,6 +92,10 @@ public class DefaultPricingService implements PricingService {
     private BigDecimal applyWeekendOrHolidaySurcharge(BigDecimal price,
                                                       DayType dayType,
                                                       Tariff tariff) {
+        if(price == null || dayType == null || tariff == null) {
+            return BigDecimal.ZERO.setScale(2);
+        }
+
         if (dayType != DayType.WEEKEND && dayType != DayType.HOLIDAY) {
             return price;
         }
@@ -104,6 +119,6 @@ public class DefaultPricingService implements PricingService {
 
     private BigDecimal getWeekendOrHolidaySurchargePercent(Tariff tariff) {
         BigDecimal s = tariff.getWeekendOrHolidaySurchargePercent();
-        return (s == null || s.signum() < 0) ? BigDecimal.ZERO : s;
+        return (s == null || s.signum() < 0) ? BigDecimal.ZERO : s.divide(BigDecimal.valueOf(100));
     }
 }

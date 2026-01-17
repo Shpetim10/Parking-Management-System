@@ -12,6 +12,8 @@ public class SubscriptionPlan {
     public final boolean hasEvRights;
     public final boolean hasVipRights;
 
+    public final DiscountInfo discountInfo;
+
     public SubscriptionPlan(
             int maxConcurrentSessions,
             int maxConcurrentSessionsPerVehicle,
@@ -19,7 +21,7 @@ public class SubscriptionPlan {
             double maxDailyHours,
             boolean weekdayOnly,
             boolean hasEvRights,
-            boolean hasVipRights
+            boolean hasVipRights, DiscountInfo discountInfo
     ) {
         this.maxConcurrentSessions = maxConcurrentSessions;
         this.maxConcurrentSessionsPerVehicle = maxConcurrentSessionsPerVehicle;
@@ -28,5 +30,6 @@ public class SubscriptionPlan {
         this.weekdayOnly = weekdayOnly;
         this.hasEvRights = hasEvRights;
         this.hasVipRights = hasVipRights;
+        this.discountInfo = discountInfo;
     }
 }

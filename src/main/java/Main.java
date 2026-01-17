@@ -446,7 +446,19 @@ public class Main {
     }
 
     private static SubscriptionPlan defaultPlan() {
-        return new SubscriptionPlan(1, 1, 5, 8,  false,false,false);
+        return new SubscriptionPlan(
+                1,
+                1,
+                5,
+                8,
+                false,
+                false,
+                false,
+                new DiscountInfo(new BigDecimal("10"),
+                        new BigDecimal("0"),
+                        new BigDecimal("0"),
+                        false,
+                        0));
     }
 
     private static void printMenu() {
