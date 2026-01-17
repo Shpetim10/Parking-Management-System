@@ -45,7 +45,6 @@ public class BillingController {
 
         Tariff tariff = tariffRepository.findByZoneType(request.zoneType());
         DynamicPricingConfig dynamicConfig = dynamicPricingConfigRepository.getActiveConfig();
-        DiscountInfo discountInfo = discountPolicyRepository.findDiscountForUser(session.getUserId());
 
         PenaltyHistory penaltyHistory = penaltyHistoryRepository.findById(session.getUserId());
         BigDecimal penaltiesTotal = penaltyHistory != null
@@ -53,10 +52,10 @@ public class BillingController {
                 : BigDecimal.ZERO;
 
         // Subscription plan – we only use it to derive parameters, not to recalc the bill.
-        SubscriptionPlan plan = subscriptionPlanRepository.getPlanForUser(session.getUserId());
+        SubscriptionPlan plan = subscriptionPlanRepository.getPlanForUser(session.getUserId()).orElseThrow();
 
         int effectiveMaxDurationHours = request.maxDurationHours();
-        if (plan != null && plan.maxDailyHours > 0 && effectiveMaxDurationHours <= 0) {
+        if (plan.maxDailyHours > 0 && effectiveMaxDurationHours <= 0) {
             effectiveMaxDurationHours = (int) Math.round(plan.maxDailyHours);
         }
 
@@ -74,7 +73,7 @@ public class BillingController {
                 request.occupancyRatio(),
                 tariff,
                 dynamicConfig,
-                discountInfo,
+                plan.discountInfo,
                 penaltiesTotal,
                 effectiveMaxDurationHours,
                 maxPriceCap,

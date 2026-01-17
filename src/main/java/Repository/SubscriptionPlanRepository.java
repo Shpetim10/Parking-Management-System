@@ -2,7 +2,9 @@ package Repository;
 
 import Model.SubscriptionPlan;
 
+import java.util.Optional;
+
 public interface SubscriptionPlanRepository {
 
-    SubscriptionPlan getPlanForUser(String userId);
+    Optional<SubscriptionPlan> getPlanForUser(String userId);
 }

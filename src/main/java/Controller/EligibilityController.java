@@ -30,7 +30,7 @@ public class EligibilityController {
 
         User user = userRepository.findById(dto.userId()).orElseThrow();
         Vehicle vehicle = vehicleRepository.findByPlate(dto.vehiclePlate()).orElseThrow();
-        SubscriptionPlan plan = planRepository.getPlanForUser(dto.userId());
+        SubscriptionPlan plan = planRepository.getPlanForUser(dto.userId()).orElseThrow();
 
         var result = eligibilityService.canStartSession(
                 user,

@@ -5,6 +5,7 @@ import Repository.SubscriptionPlanRepository;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class InMemorySubscriptionPlanRepository implements SubscriptionPlanRepository {
     private final Map<String, SubscriptionPlan> subscriptions = new HashMap<>();
@@ -15,7 +16,7 @@ public class InMemorySubscriptionPlanRepository implements SubscriptionPlanRepos
     }
 
     @Override
-    public SubscriptionPlan getPlanForUser(String userId) {
-        return plansByUser.get(userId);
+    public Optional<SubscriptionPlan> getPlanForUser(String userId) {
+        return Optional.ofNullable(plansByUser.get(userId));
     }
 }

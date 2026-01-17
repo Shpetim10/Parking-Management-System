@@ -35,7 +35,7 @@ public class ZoneAllocationController {
     public SpotAssignmentResponseDto assignSpot(SpotAssignmentRequestDto dto){
         Objects.requireNonNull(dto);
 
-        SubscriptionPlan subscriptionPlan= subscriptionPlanRepository.getPlanForUser(dto.userId());
+        SubscriptionPlan subscriptionPlan= subscriptionPlanRepository.getPlanForUser(dto.userId()).orElseThrow();
 
         SpotAssignmentRequest request = new SpotAssignmentRequest(
                 dto.userId(),

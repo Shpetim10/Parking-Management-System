@@ -5,18 +5,13 @@ import Enum.ZoneType;
 import Model.*;
 import Service.MonitoringService;
 
-import java.time.Duration;
-import java.time.Instant;
+import Settings.Settings;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MonitoringServiceImpl implements MonitoringService {
-
-    // ✅ CENTRALIZED BUSINESS RULES
-    private static final int MAX_PENALTIES_ALLOWED = 3;
-    private static final Duration BLACKLIST_WINDOW = Duration.ofDays(30);
-
     private final List<LogEvent> logs = new ArrayList<>();
 
     @Override
@@ -27,13 +22,13 @@ public class MonitoringServiceImpl implements MonitoringService {
     ) {
         history.addPenalty(newPenalty);
 
-        LocalDateTime cutoff = LocalDateTime.now().minus(BLACKLIST_WINDOW);
+        LocalDateTime cutoff = LocalDateTime.now().minus(Settings.BLACKLIST_WINDOW);
 
         long penaltiesInWindow = history.getPenalties().stream()
                 .filter(p -> p.getTimestamp().isAfter(cutoff))
                 .count();
 
-        return penaltiesInWindow > MAX_PENALTIES_ALLOWED
+        return penaltiesInWindow > Settings.MAX_PENALTIES_ALLOWED
                 ? BlacklistStatus.CANDIDATE_FOR_BLACKLISTING
                 : BlacklistStatus.NONE;
     }

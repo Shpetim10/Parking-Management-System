@@ -18,10 +18,6 @@ import java.time.ZoneId;
 import java.util.Objects;
 
 public class PenaltyController {
-
-    private static final int MAX_PENALTIES_ALLOWED = 3;
-    private static final Duration BLACKLIST_WINDOW = Duration.ofDays(30);
-
     private final PenaltyService penaltyService;
     private final MonitoringService monitoringService;
     private final PenaltyHistoryRepository penaltyHistoryRepository;
