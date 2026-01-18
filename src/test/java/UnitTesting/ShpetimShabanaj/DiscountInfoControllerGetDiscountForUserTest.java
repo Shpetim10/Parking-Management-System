@@ -28,15 +28,14 @@ public class DiscountInfoControllerGetDiscountForUserTest {
     void testGetDiscountForUserHappyPath() {
         String userId = "U1";
 
-        DiscountInfo info = new DiscountInfo(
-                new BigDecimal("0.20"),            // subscriptionDiscountPercent
-                new BigDecimal("0.00"),             // promoDiscountPercent
-                BigDecimal.ZERO, // promoDiscountFixed
-                true,            // subscriptionHasFreeHours
-                2                // freeHoursPerDay
-        );
+        DiscountInfo discountInfoMock= mock(DiscountInfo.class);
+        when(discountInfoMock.getSubscriptionDiscountPercent()).thenReturn(new BigDecimal("0.20"));
+        when(discountInfoMock.getPromoDiscountPercent()).thenReturn(new BigDecimal("0.00"));
+        when(discountInfoMock.getFreeHoursPerDay()).thenReturn(2);
+        when(discountInfoMock.getPromoDiscountFixed()).thenReturn(new BigDecimal("0.00"));
+        when(discountInfoMock.isSubscriptionHasFreeHours()).thenReturn(true);
 
-        when(repository.findDiscountForUser(userId)).thenReturn(info);
+        when(repository.findDiscountForUser(userId)).thenReturn(discountInfoMock);
 
         DiscountInfoDto result = controller.getDiscountForUser(userId);
 
@@ -45,7 +44,7 @@ public class DiscountInfoControllerGetDiscountForUserTest {
         assertAll("Verify all fields are mapped correctly",
                 () -> assertEquals(new BigDecimal("0.20"), result.subscriptionDiscountPercent()),
                 () -> assertEquals(new BigDecimal("0.00"), result.promoDiscountPercent()),
-                () -> assertEquals(BigDecimal.ZERO, result.promoDiscountFixed()),
+                () -> assertEquals(new BigDecimal("0.00"), result.promoDiscountFixed()),
                 () -> assertTrue(result.subscriptionHasFreeHours()),
                 () -> assertEquals(2, result.freeHoursPerDay())
         );
