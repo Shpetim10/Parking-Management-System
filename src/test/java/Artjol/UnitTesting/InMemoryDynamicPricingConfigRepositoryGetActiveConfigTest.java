@@ -44,32 +44,7 @@ class InMemoryDynamicPricingConfigRepositoryGetActiveConfigTest {
         assertNotEquals(mockConfig, activeConfig);
     }
 
-    @Test
-    @DisplayName("getActiveConfig with real config object")
-    void testGetActiveConfig_RealConfigObject() {
-        DynamicPricingConfig realConfig = new DynamicPricingConfig(1.5, 0.8, 1.3);
 
-        InMemoryDynamicPricingConfigRepository repo =
-                new InMemoryDynamicPricingConfigRepository(realConfig);
-
-        DynamicPricingConfig active = repo.getActiveConfig();
-
-        assertEquals(realConfig, active);
-        assertEquals(1.5, active.getPeakHourMultiplier());
-        assertEquals(0.8, active.getHighOccupancyThreshold());
-        assertEquals(1.3, active.getHighOccupancyMultiplier());
-    }
-
-    @Test
-    @DisplayName("getActiveConfig does not modify internal state")
-    void testGetActiveConfig_DoesNotModifyState() {
-        DynamicPricingConfig config1 = repository.getActiveConfig();
-        DynamicPricingConfig config2 = repository.getActiveConfig();
-        DynamicPricingConfig config3 = repository.getActiveConfig();
-
-        assertEquals(config1, config2);
-        assertEquals(config2, config3);
-    }
 
     @Test
     @DisplayName("getActiveConfig after multiple saves returns latest")

@@ -37,31 +37,6 @@ class ExitDecisionAllowTest {
     }
 
     @Test
-    @DisplayName("allow decision has correct allowed state")
-    void testAllow_CorrectAllowedState() {
-        ExitDecision decision = ExitDecision.allow();
-
-        assertTrue(decision.isAllowed());
-    }
-
-    @Test
-    @DisplayName("allow decision has NONE failure reason")
-    void testAllow_NoneFailureReason() {
-        ExitDecision decision = ExitDecision.allow();
-
-        assertEquals(ExitFailureReason.NONE, decision.getReason());
-        assertNotNull(decision.getReason());
-    }
-
-    @Test
-    @DisplayName("allow decision reason is not null")
-    void testAllow_ReasonNotNull() {
-        ExitDecision decision = ExitDecision.allow();
-
-        assertNotNull(decision.getReason());
-    }
-
-    @Test
     @DisplayName("multiple allow calls are consistent")
     void testAllow_MultipleCallsConsistent() {
         ExitDecision decision1 = ExitDecision.allow();

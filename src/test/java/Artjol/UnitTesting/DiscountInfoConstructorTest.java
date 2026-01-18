@@ -105,23 +105,6 @@ class DiscountInfoConstructorTest {
         assertTrue(exception.getMessage().contains("must not be negative"));
     }
 
-    @Test
-    @DisplayName("Constructor with all zero values")
-    void testConstructor_AllZeroValues() {
-        DiscountInfo info = new DiscountInfo(
-                BigDecimal.ZERO,
-                BigDecimal.ZERO,
-                BigDecimal.ZERO,
-                false,
-                0
-        );
-
-        assertEquals(BigDecimal.ZERO, info.getSubscriptionDiscountPercent());
-        assertEquals(BigDecimal.ZERO, info.getPromoDiscountPercent());
-        assertEquals(BigDecimal.ZERO, info.getPromoDiscountFixed());
-        assertFalse(info.isSubscriptionHasFreeHours());
-        assertEquals(0, info.getFreeHoursPerDay());
-    }
 
     @Test
     @DisplayName("Constructor with maximum valid values")

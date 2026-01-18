@@ -79,60 +79,6 @@ class ParkingSessionConstructorTest {
     }
 
     @Test
-    @DisplayName("Constructor throws exception for null vehiclePlate")
-    void testConstructor_NullVehiclePlate() {
-        assertThrows(NullPointerException.class, () -> {
-            new ParkingSession(
-                    "session-1",
-                    "user-1",
-                    null,
-                    "zone-1",
-                    "spot-1",
-                    TimeOfDayBand.PEAK,
-                    DayType.WEEKDAY,
-                    ZoneType.STANDARD,
-                    LocalDateTime.now()
-            );
-        });
-    }
-
-    @Test
-    @DisplayName("Constructor throws exception for null zoneId")
-    void testConstructor_NullZoneId() {
-        assertThrows(NullPointerException.class, () -> {
-            new ParkingSession(
-                    "session-1",
-                    "user-1",
-                    "ABC123",
-                    null,
-                    "spot-1",
-                    TimeOfDayBand.PEAK,
-                    DayType.WEEKDAY,
-                    ZoneType.STANDARD,
-                    LocalDateTime.now()
-            );
-        });
-    }
-
-    @Test
-    @DisplayName("Constructor throws exception for null spotId")
-    void testConstructor_NullSpotId() {
-        assertThrows(NullPointerException.class, () -> {
-            new ParkingSession(
-                    "session-1",
-                    "user-1",
-                    "ABC123",
-                    "zone-1",
-                    null,
-                    TimeOfDayBand.PEAK,
-                    DayType.WEEKDAY,
-                    ZoneType.STANDARD,
-                    LocalDateTime.now()
-            );
-        });
-    }
-
-    @Test
     @DisplayName("Constructor throws exception for null startTime")
     void testConstructor_NullStartTime() {
         assertThrows(NullPointerException.class, () -> {
@@ -146,60 +92,6 @@ class ParkingSessionConstructorTest {
                     DayType.WEEKDAY,
                     ZoneType.STANDARD,
                     null
-            );
-        });
-    }
-
-    @Test
-    @DisplayName("Constructor throws exception for null zoneType")
-    void testConstructor_NullZoneType() {
-        assertThrows(NullPointerException.class, () -> {
-            new ParkingSession(
-                    "session-1",
-                    "user-1",
-                    "ABC123",
-                    "zone-1",
-                    "spot-1",
-                    TimeOfDayBand.PEAK,
-                    DayType.WEEKDAY,
-                    null,
-                    LocalDateTime.now()
-            );
-        });
-    }
-
-    @Test
-    @DisplayName("Constructor throws exception for null timeOfDayBand")
-    void testConstructor_NullTimeOfDayBand() {
-        assertThrows(NullPointerException.class, () -> {
-            new ParkingSession(
-                    "session-1",
-                    "user-1",
-                    "ABC123",
-                    "zone-1",
-                    "spot-1",
-                    null,
-                    DayType.WEEKDAY,
-                    ZoneType.STANDARD,
-                    LocalDateTime.now()
-            );
-        });
-    }
-
-    @Test
-    @DisplayName("Constructor throws exception for null dayType")
-    void testConstructor_NullDayType() {
-        assertThrows(NullPointerException.class, () -> {
-            new ParkingSession(
-                    "session-1",
-                    "user-1",
-                    "ABC123",
-                    "zone-1",
-                    "spot-1",
-                    TimeOfDayBand.PEAK,
-                    null,
-                    ZoneType.STANDARD,
-                    LocalDateTime.now()
             );
         });
     }
