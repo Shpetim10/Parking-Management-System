@@ -1,5 +1,7 @@
 package Model;
 
+import java.util.Objects;
+
 public class SubscriptionPlan {
 
     public final int maxConcurrentSessions;
@@ -21,7 +23,8 @@ public class SubscriptionPlan {
             double maxDailyHours,
             boolean weekdayOnly,
             boolean hasEvRights,
-            boolean hasVipRights, DiscountInfo discountInfo
+            boolean hasVipRights,
+            DiscountInfo discountInfo
     ) {
         this.maxConcurrentSessions = maxConcurrentSessions;
         this.maxConcurrentSessionsPerVehicle = maxConcurrentSessionsPerVehicle;
@@ -30,6 +33,14 @@ public class SubscriptionPlan {
         this.weekdayOnly = weekdayOnly;
         this.hasEvRights = hasEvRights;
         this.hasVipRights = hasVipRights;
-        this.discountInfo = discountInfo;
+        this.discountInfo = Objects.requireNonNull(discountInfo);
+    }
+
+    public boolean hasVipRights() {
+        return hasVipRights;
+    }
+
+    public boolean hasEvRights() {
+        return hasEvRights;
     }
 }

@@ -72,4 +72,8 @@ public class ParkingSpot {
     public boolean isOccupied() {
         return state == SpotState.OCCUPIED;
     }
+
+    public void setState(SpotState state) {
+        this.state = state;
+    }
 }

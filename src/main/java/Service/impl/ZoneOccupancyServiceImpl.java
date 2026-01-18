@@ -1,6 +1,7 @@
 package Service.impl;
 
 import Model.ParkingSession;
+import Model.ParkingZone;
 import Repository.ParkingSessionRepository;
 import Repository.ParkingZoneRepository;
 import Service.ZoneOccupancyService;
@@ -22,6 +23,10 @@ public class ZoneOccupancyServiceImpl implements ZoneOccupancyService {
 
     @Override
     public double calculateOccupancyRatioForZone(String zoneId) {
+        ParkingZone zone = zoneRepo.findById(zoneId);
+
+        if (zone == null) return 0;
+
         long totalSpots = zoneRepo.findById(zoneId).getTotalSpots();
 
         long occupied = sessionRepo.findAll().stream()

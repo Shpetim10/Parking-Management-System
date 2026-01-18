@@ -17,6 +17,9 @@ public class ExitDecision {
     }
 
     public static ExitDecision deny(ExitFailureReason reason) {
+        if(reason==null)
+            reason=ExitFailureReason.NONE;
+
         return new ExitDecision(false, reason);
     }
 

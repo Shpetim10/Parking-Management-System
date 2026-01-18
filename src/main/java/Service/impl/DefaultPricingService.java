@@ -76,7 +76,7 @@ public class DefaultPricingService implements PricingService {
         return price.multiply(BigDecimal.valueOf(multiplier));
     }
 
-    private BigDecimal applyHighOccupancySurge(BigDecimal price,
+    public BigDecimal applyHighOccupancySurge(BigDecimal price,
                                                double occupancyRatio,
                                                DynamicPricingConfig config) {
         if (price == null || occupancyRatio < 0 || occupancyRatio>1 || config == null) {
@@ -84,12 +84,12 @@ public class DefaultPricingService implements PricingService {
         }
 
         if (occupancyRatio >= config.getHighOccupancyThreshold()) {
-            return price.multiply(BigDecimal.valueOf(config.getHighOccupancyMultiplier()));
+            return price.multiply(BigDecimal.valueOf(config.getHighOccupancyMultiplier())).setScale(2);
         }
         return price;
     }
 
-    private BigDecimal applyWeekendOrHolidaySurcharge(BigDecimal price,
+    public BigDecimal applyWeekendOrHolidaySurcharge(BigDecimal price,
                                                       DayType dayType,
                                                       Tariff tariff) {
         if(price == null || dayType == null || tariff == null) {
@@ -97,14 +97,14 @@ public class DefaultPricingService implements PricingService {
         }
 
         if (dayType != DayType.WEEKEND && dayType != DayType.HOLIDAY) {
-            return price;
+            return price.setScale(2, RoundingMode.HALF_UP);
         }
         BigDecimal surchargePercent = getWeekendOrHolidaySurchargePercent(tariff);
         if (surchargePercent.signum() <= 0) {
-            return price;
+            return price.setScale(2, RoundingMode.HALF_UP);
         }
         BigDecimal factor = BigDecimal.ONE.add(surchargePercent);
-        return price.multiply(factor);
+        return price.multiply(factor).setScale(2, RoundingMode.HALF_UP);
     }
 
     private BigDecimal applyDailyCap(BigDecimal price, BigDecimal dailyCap, int durationHours) {

@@ -25,6 +25,10 @@ public class BillingRecord {
         this.entryTime = Objects.requireNonNull(entryTime, "entryTime must not be null");
         this.exitTime = Objects.requireNonNull(exitTime, "exitTime must not be null");
         this.billingResult = Objects.requireNonNull(billingResult, "billingResult must not be null");
+
+        if(exitTime.isBefore(entryTime)) {
+            throw new IllegalArgumentException("exitTime must not be before entryTime");
+        }
     }
 
     @Override

@@ -44,6 +44,7 @@ public class InMemoryParkingSessionRepository implements ParkingSessionRepositor
 
     @Override
     public void delete(ParkingSession session) {
+        Objects.requireNonNull(session);
         sessions.remove(session.getId());
     }
 

@@ -16,6 +16,7 @@ public class DiscountInfoController {
     public DiscountInfoDto getDiscountForUser(String userId) {
         Objects.requireNonNull(userId, "userId must not be null");
         DiscountInfo info = discountPolicyRepository.findDiscountForUser(userId);
+        Objects.requireNonNull(info, "discountInfo must not be null");
         return new DiscountInfoDto(
                 info.getSubscriptionDiscountPercent(),
                 info.getPromoDiscountPercent(),
