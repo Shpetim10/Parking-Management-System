@@ -37,6 +37,7 @@ public class InMemoryParkingZoneRepository implements ParkingZoneRepository {
     @Override
     public void save(ParkingZone zone) {
         Objects.requireNonNull(zone, "zone must not be null");
+        Objects.requireNonNull(zone.getZoneId(), "zoneId must not be null");
         zones.put(zone.getZoneId(), zone);
     }
 

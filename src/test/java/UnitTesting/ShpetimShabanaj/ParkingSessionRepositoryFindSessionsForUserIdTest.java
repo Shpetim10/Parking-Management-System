@@ -84,6 +84,17 @@ public class ParkingSessionRepositoryFindSessionsForUserIdTest {
         assertTrue(result.isEmpty(), "Result should be an empty list");
     }
 
+    @Test
+    @DisplayName("TC-05: Should return empty list when the user id is with uppercase but searched with lowercase")
+    void testNoMatchingSessionsForCaseSensitive() {
+        repository.save(createMockSession("S1", TARGET_USER, true));
+
+        List<ParkingSession> result = repository.findActiveSessionsForUser("u1");
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty(), "Result should be an empty list");
+    }
+
     //Helper for creating session mocks
     private ParkingSession createMockSession(String id, String userId, boolean isActive) {
         ParkingSession session = mock(ParkingSession.class);

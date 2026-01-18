@@ -58,4 +58,17 @@ public class VehicleRepositoryFindByPlateTest {
 
         assertTrue(result.isEmpty());
     }
+
+    // TC-04
+    @Test
+    @DisplayName("TC-04: Should return an empty Optional when the input plate is with lower case, and saved with upper case")
+    void testFindByPlateForCaseSensitive() {
+        Vehicle mockVehicle = mock(Vehicle.class);
+        when(mockVehicle.getPlateNumber()).thenReturn("CC111");
+        repository.save(mockVehicle);
+
+        Optional<Vehicle> result = repository.findByPlate("cc111");
+
+        assertTrue(result.isEmpty());
+    }
 }
