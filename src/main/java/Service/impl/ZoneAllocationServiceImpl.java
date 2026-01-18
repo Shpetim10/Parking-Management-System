@@ -24,9 +24,10 @@ public class ZoneAllocationServiceImpl implements ZoneAllocationService {
         return spot;
     }
 
-    private boolean zoneAccessDenied(SpotAssignmentRequest request, ZoneType zoneType) {
-        if (zoneType == ZoneType.EV && !request.getSubscriptionPlan().hasEvRights) return true;
-        if (zoneType == ZoneType.VIP && !request.getSubscriptionPlan().hasVipRights) return true;
+    public boolean zoneAccessDenied(SpotAssignmentRequest request, ZoneType zoneType) {
+        Objects.requireNonNull(request);
+        if (zoneType == ZoneType.EV && !request.getSubscriptionPlan().hasEvRights()) return true;
+        if (zoneType == ZoneType.VIP && !request.getSubscriptionPlan().hasVipRights()) return true;
         return false;
     }
 }

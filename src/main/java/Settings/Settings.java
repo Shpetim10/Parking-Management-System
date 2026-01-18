@@ -19,6 +19,8 @@ public final class Settings {
     public static final LocalTime START_PEAK_TIME = LocalTime.of(11, 0); // 11:00
     public static final LocalTime END_PEAK_TIME   = LocalTime.of(21, 0); // 21:00
 
+    public static final BigDecimal MAX_BALANCE = BigDecimal.valueOf(10000);
+
     public static BigDecimal getMaxPriceCapacity() {
         return MAX_PRICE_CAPACITY;
     }

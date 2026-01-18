@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MonitoringServiceImpl implements MonitoringService {
-    private final List<LogEvent> logs = new ArrayList<>();
+    public final List<LogEvent> logs = new ArrayList<>();
 
     @Override
     public BlacklistStatus updatePenaltyHistoryAndCheckBlacklist(

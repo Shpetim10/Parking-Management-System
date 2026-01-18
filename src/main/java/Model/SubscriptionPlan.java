@@ -35,4 +35,12 @@ public class SubscriptionPlan {
         this.hasVipRights = hasVipRights;
         this.discountInfo = Objects.requireNonNull(discountInfo);
     }
+
+    public boolean hasVipRights() {
+        return hasVipRights;
+    }
+
+    public boolean hasEvRights() {
+        return hasEvRights;
+    }
 }
