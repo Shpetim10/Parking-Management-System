@@ -42,7 +42,7 @@ public class DiscountInfo {
         return Objects.hash(subscriptionDiscountPercent, promoDiscountPercent, promoDiscountFixed, subscriptionHasFreeHours, freeHoursPerDay);
     }
 
-    private static BigDecimal normalizePercent(BigDecimal value, String fieldName) {
+    public static BigDecimal normalizePercent(BigDecimal value, String fieldName) {
         if (value == null) {
             return BigDecimal.ZERO;
         }

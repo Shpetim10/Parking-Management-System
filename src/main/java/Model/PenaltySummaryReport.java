@@ -4,6 +4,7 @@ import Enum.PenaltyType;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 
 public class PenaltySummaryReport {
 
@@ -12,15 +13,15 @@ public class PenaltySummaryReport {
     private final BigDecimal totalMisuse;
     private final int blacklistCandidatesCount;
 
-    private PenaltySummaryReport(
+    public PenaltySummaryReport(
             BigDecimal totalOverstay,
             BigDecimal totalLostTicket,
             BigDecimal totalMisuse,
             int blacklistCandidatesCount
     ) {
-        this.totalOverstay = totalOverstay;
-        this.totalLostTicket = totalLostTicket;
-        this.totalMisuse = totalMisuse;
+        this.totalOverstay = Objects.requireNonNull(totalOverstay);
+        this.totalLostTicket = Objects.requireNonNull(totalLostTicket);
+        this.totalMisuse = Objects.requireNonNull(totalMisuse);
         this.blacklistCandidatesCount = blacklistCandidatesCount;
     }
 

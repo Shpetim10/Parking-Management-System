@@ -85,7 +85,7 @@ public class Main {
                 eligibilityService,
                 userRepo,
                 vehicleRepo,
-                subscriptionRepo::getPlanForUser
+                subscriptionRepo
         );
 
         var zoneController = new ZoneAllocationController(
@@ -106,7 +106,7 @@ public class Main {
                 billingRepo,
                 sessionRepo,
                 penaltyRepo,
-                subscriptionRepo::getPlanForUser
+                subscriptionRepo
         );
 
         var penaltyController =
@@ -454,7 +454,7 @@ public class Main {
                 false,
                 false,
                 false,
-                new DiscountInfo(new BigDecimal("10"),
+                new DiscountInfo(new BigDecimal("0.1"),
                         new BigDecimal("0"),
                         new BigDecimal("0"),
                         false,
