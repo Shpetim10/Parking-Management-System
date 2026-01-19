@@ -2,5 +2,6 @@ package Enum;
 
 public enum BlacklistStatus {
     NONE,
-    CANDIDATE_FOR_BLACKLISTING
+    CANDIDATE_FOR_BLACKLISTING,
+    BLACKLISTED
 }
