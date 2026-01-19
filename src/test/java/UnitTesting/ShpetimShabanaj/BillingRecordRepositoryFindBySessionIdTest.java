@@ -62,4 +62,20 @@ public class BillingRecordRepositoryFindBySessionIdTest {
         Optional<BillingRecord> foundRecord=billingRecordRepository.findBySessionId(null);
         assertFalse(foundRecord.isPresent());
     }
+
+    @Test
+    @DisplayName("TC-04: Should be case-sensitive when finding by sessionId")
+    void testFindBySessionIdIsCaseSensitive() {
+        String storedId = "S1";
+        BillingRecord record = mock(BillingRecord.class);
+        when(record.getSessionId()).thenReturn(storedId);
+        billingRecordRepository.save(record);
+
+        // different case
+        Optional<BillingRecord> found = billingRecordRepository.findBySessionId("s1");
+
+        assertTrue(billingRecordRepository.findBySessionId("S1").isPresent());
+        assertFalse(found.isPresent());
+    }
+
 }

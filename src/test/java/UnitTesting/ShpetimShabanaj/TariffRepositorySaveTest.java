@@ -64,4 +64,29 @@ public class TariffRepositorySaveTest {
         assertEquals(secondTariff, repository.findByZoneType(type));
     }
 
+    @Test
+    @DisplayName("TC-04: Should throw when tariff has null ZoneType")
+    void testSaveTariffWithNullZoneType() {
+        Tariff t = mock(Tariff.class);
+        when(t.getZoneType()).thenReturn(null);
+
+        NullPointerException ex = assertThrows(NullPointerException.class, () -> repository.save(t));
+    }
+
+    @Test
+    @DisplayName("TC-05: Saving one ZoneType should not affect another")
+    void testSaveDoesNotAffectOtherZoneTypes() {
+        Tariff standard = mock(Tariff.class);
+        Tariff premium = mock(Tariff.class);
+        when(standard.getZoneType()).thenReturn(ZoneType.STANDARD);
+        when(premium.getZoneType()).thenReturn(ZoneType.VIP);
+
+        repository.save(standard);
+        repository.save(premium);
+
+        assertEquals(standard, repository.findByZoneType(ZoneType.STANDARD));
+        assertEquals(premium, repository.findByZoneType(ZoneType.VIP));
+    }
+
+
 }
