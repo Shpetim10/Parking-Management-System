@@ -35,7 +35,7 @@ public  class BillingResult {
     }
 
     public BigDecimal getPenaltiesTotal() {
-        return penaltiesTotal;
+        return penaltiesTotal.setScale(2, BigDecimal.ROUND_HALF_UP);
     }
 
     public BigDecimal getNetPrice() {

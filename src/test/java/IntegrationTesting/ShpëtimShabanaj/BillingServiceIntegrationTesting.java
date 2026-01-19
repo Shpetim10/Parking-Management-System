@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("Integration Tests - DefaultBillingService (Neighbourhood Radius 1)")
-class DefaultBillingServiceIntegrationTest {
+class BillingServiceIntegrationTesting {
 
     private DefaultBillingService billingService;
     private DefaultDurationCalculator durationCalculator;
