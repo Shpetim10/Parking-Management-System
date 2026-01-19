@@ -1,9 +1,9 @@
 package Dto.Monitoring;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 public record LogEventDto(
-        Instant timestamp,
+        LocalDateTime timestamp,
         String type,
         String details
 ) { }
