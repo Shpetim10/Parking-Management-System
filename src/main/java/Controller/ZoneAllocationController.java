@@ -54,7 +54,7 @@ public class ZoneAllocationController {
                     .calculateOccupancyRatioForZone(zone.getZoneId());
 
             if (occupancy >= zone.getMaxOccupancyThreshold()) {
-                return null;
+                continue;
             }
 
             ParkingSpot spot = zoneAllocationService.assignSpot(request, zone);

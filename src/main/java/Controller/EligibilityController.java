@@ -27,12 +27,13 @@ public class EligibilityController {
     }
 
     public EligibilityResponseDto checkEligibility(EligibilityRequestDto dto) {
+        Objects.requireNonNull(dto);
 
         User user = userRepository.findById(dto.userId()).orElseThrow();
         Vehicle vehicle = vehicleRepository.findByPlate(dto.vehiclePlate()).orElseThrow();
         SubscriptionPlan plan = planRepository.getPlanForUser(dto.userId()).orElseThrow();
 
-        var result = eligibilityService.canStartSession(
+        EligibilityResult result = eligibilityService.canStartSession(
                 user,
                 vehicle,
                 dto.activeSessionsForVehicle(),
@@ -43,6 +44,8 @@ public class EligibilityController {
                 dto.hasUnpaidSessions(),
                 dto.now()
         );
+
+        Objects.requireNonNull(result, "Something went wrong!");
 
         return new EligibilityResponseDto(result.isAllowed(), result.getReason());
     }

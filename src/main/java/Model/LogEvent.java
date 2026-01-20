@@ -1,14 +1,15 @@
 package Model;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 public class LogEvent {
 
-    private final Instant timestamp;
+    private final LocalDateTime timestamp;
     private final String type;
     private final String details;
 
-    public LogEvent(Instant timestamp, String type, String details) {
+    public LogEvent(LocalDateTime timestamp, String type, String details) {
         if (timestamp == null || type == null || details == null) {
             throw new IllegalArgumentException("LogEvent fields cannot be null");
         }
@@ -17,7 +18,7 @@ public class LogEvent {
         this.details = details;
     }
 
-    public Instant getTimestamp() {
+    public LocalDateTime getTimestamp() {
         return timestamp;
     }
 

@@ -52,4 +52,14 @@ public class ParkingZoneRepositorySaveTest {
 
         assertEquals(parkingZone2, parkingZoneRepository.findZoneById("Z1"));
     }
+
+    //TC-04
+    @Test
+    @DisplayName("TC-04: Verify it fails with id null")
+    void testNotSavingWhenIdIsNull(){
+        ParkingZone parkingZone=mock(ParkingZone.class);
+        when(parkingZone.getZoneId()).thenReturn(null);
+
+        assertThrows(NullPointerException.class, ()->parkingZoneRepository.save(parkingZone));
+    }
 }

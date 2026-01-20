@@ -125,4 +125,33 @@ public class ParkingZoneRepositoryFindSpotByIDTest {
 
         assertNull(repository.findSpotById(null));
     }
+
+    //TC-07
+    @Test
+    @DisplayName("TC-07: Should return null when spot id is saved with uppercase but searched with lowercase")
+    void testWithIdCaseSensitive(){
+        // Arrange: Zone 1 with Spot 1
+        String id1 = "S1";
+        ParkingSpot spotA = mock(ParkingSpot.class);
+        when(spotA.getSpotId()).thenReturn(id1);
+
+        ParkingZone zone1 = mock(ParkingZone.class);
+        when(zone1.getZoneId()).thenReturn("Z1");
+        when(zone1.getSpots()).thenReturn(List.of(spotA));
+
+        // Arrange: Zone 2 with Spot 2
+        String id2 = "S2";
+        ParkingSpot spotB = mock(ParkingSpot.class);
+        when(spotB.getSpotId()).thenReturn(id2);
+
+        ParkingZone zone2 = mock(ParkingZone.class);
+        when(zone2.getZoneId()).thenReturn("Z2");
+        when(zone2.getSpots()).thenReturn(List.of(spotB));
+
+        repository.save(zone1);
+        repository.save(zone2);
+
+        assertNull(repository.findSpotById("s1"));
+        assertNull(repository.findSpotById("s2"));
+    }
 }
