@@ -43,4 +43,36 @@ public class SubscriptionPlan {
     public boolean hasEvRights() {
         return hasEvRights;
     }
+
+    public int getMaxConcurrentSessions() {
+        return maxConcurrentSessions;
+    }
+
+    public int getMaxConcurrentSessionsPerVehicle() {
+        return maxConcurrentSessionsPerVehicle;
+    }
+
+    public int getMaxDailySessions() {
+        return maxDailySessions;
+    }
+
+    public double getMaxDailyHours() {
+        return maxDailyHours;
+    }
+
+    public boolean isHasVipRights() {
+        return hasVipRights;
+    }
+
+    public boolean isWeekdayOnly() {
+        return weekdayOnly;
+    }
+
+    public boolean isHasEvRights() {
+        return hasEvRights;
+    }
+
+    public DiscountInfo getDiscountInfo() {
+        return discountInfo;
+    }
 }

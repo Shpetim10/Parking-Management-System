@@ -56,7 +56,7 @@ public class DiscountInfo {
         return value;
     }
 
-    private static BigDecimal normalizeNonNegativeAmount(BigDecimal value, String fieldName) {
+    public static BigDecimal normalizeNonNegativeAmount(BigDecimal value, String fieldName) {
         if (value == null) {
             return BigDecimal.ZERO;
         }
