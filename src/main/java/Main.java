@@ -102,7 +102,6 @@ public class Main {
                 billingService,
                 tariffRepo,
                 pricingRepo,
-                discountRepo,
                 billingRepo,
                 sessionRepo,
                 penaltyRepo,

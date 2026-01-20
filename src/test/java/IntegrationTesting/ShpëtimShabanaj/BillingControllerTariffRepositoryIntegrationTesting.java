@@ -30,30 +30,22 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("Pairwise Integration: BillingController ↔ TariffRepository")
+@DisplayName("Pairwise Integration: BillingController -- TariffRepository")
 @MockitoSettings(strictness = Strictness.LENIENT)
-class BillingControllerTariffRepositoryIntegrationTest {
+class BillingControllerTariffRepositoryIntegrationTesting {
 
     private BillingController billingController;
 
     // Real TariffRepository
     private TariffRepository tariffRepository;
 
-    // Use other dependencies as mocks
-    @Mock
-    private BillingService billingService;
-    @Mock
-    private DynamicPricingConfigRepository dynamicPricingConfigRepository;
-    @Mock
-    private DiscountPolicyRepository discountPolicyRepository;
-    @Mock
-    private BillingRecordRepository billingRecordRepository;
-    @Mock
-    private ParkingSessionRepository parkingSessionRepository;
-    @Mock
-    private PenaltyHistoryRepository penaltyHistoryRepository;
-    @Mock
-    private SubscriptionPlanRepository subscriptionPlanRepository;
+    // Other dependencies as mocks
+    @Mock private BillingService billingService;
+    @Mock private DynamicPricingConfigRepository dynamicPricingConfigRepository;
+    @Mock private BillingRecordRepository billingRecordRepository;
+    @Mock private ParkingSessionRepository parkingSessionRepository;
+    @Mock private PenaltyHistoryRepository penaltyHistoryRepository;
+    @Mock private SubscriptionPlanRepository subscriptionPlanRepository;
 
     private Tariff standardTariff;
     private Tariff evTariff;
@@ -66,23 +58,23 @@ class BillingControllerTariffRepositoryIntegrationTest {
     void setUp() {
         standardTariff = new Tariff(
                 ZoneType.STANDARD,
-                BigDecimal.valueOf(5.00),
-                BigDecimal.valueOf(50.00),
-                BigDecimal.valueOf(20.00)
+                new BigDecimal("5.00"),
+                new BigDecimal("50.00"),
+                new BigDecimal("20.00")
         );
 
         evTariff = new Tariff(
                 ZoneType.EV,
-                BigDecimal.valueOf(3.00),
-                BigDecimal.valueOf(30.00),
-                BigDecimal.valueOf(15.00)
+                new BigDecimal("3.00"),
+                new BigDecimal("30.00"),
+                new BigDecimal("15.00")
         );
 
         vipTariff = new Tariff(
                 ZoneType.VIP,
-                BigDecimal.valueOf(10.00),
-                BigDecimal.valueOf(80.00),
-                BigDecimal.valueOf(25.00)
+                new BigDecimal("10.00"),
+                new BigDecimal("80.00"),
+                new BigDecimal("25.00")
         );
 
         Map<ZoneType, Tariff> tariffMap = new EnumMap<>(ZoneType.class);
@@ -95,7 +87,7 @@ class BillingControllerTariffRepositoryIntegrationTest {
         // Setup mock objects for other dependencies
         mockSession = mock(ParkingSession.class);
         when(mockSession.getStartTime()).thenReturn(LocalDateTime.of(2026, 1, 15, 9, 0));
-        when(mockSession.getUserId()).thenReturn("user-001");
+        when(mockSession.getUserId()).thenReturn("U1");
 
         DiscountInfo mockDiscount = new DiscountInfo(
                 BigDecimal.ZERO,
@@ -117,14 +109,14 @@ class BillingControllerTariffRepositoryIntegrationTest {
         when(dynamicPricingConfigRepository.getActiveConfig()).thenReturn(mockConfig);
         when(penaltyHistoryRepository.findById(anyString())).thenReturn(null);
 
-        // Default billing result, because i am not testing for this in the moment
+        // Default billing result
         BillingResult mockResult = new BillingResult(
-                BigDecimal.valueOf(20.00),
+                new BigDecimal("20.00"),
                 BigDecimal.ZERO,
                 BigDecimal.ZERO,
-                BigDecimal.valueOf(20.00),
-                BigDecimal.valueOf(4.00),
-                BigDecimal.valueOf(24.00)
+                new BigDecimal("20.00"),
+                new BigDecimal("4.00"),
+                new BigDecimal("24.00")
         );
         when(billingService.calculateBill(any(), any(), any(), any(), any(), anyDouble(),
                 any(Tariff.class), any(), any(), any(), anyInt(), any(), any()))
@@ -135,7 +127,6 @@ class BillingControllerTariffRepositoryIntegrationTest {
                 billingService,
                 tariffRepository,
                 dynamicPricingConfigRepository,
-                discountPolicyRepository,
                 billingRecordRepository,
                 parkingSessionRepository,
                 penaltyHistoryRepository,
@@ -143,7 +134,6 @@ class BillingControllerTariffRepositoryIntegrationTest {
         );
     }
 
-    // Helper to build a generic BillingRequest
     private BillingRequest createRequest(
             String sessionId,
             ZoneType zoneType,
@@ -152,7 +142,7 @@ class BillingControllerTariffRepositoryIntegrationTest {
             double occupancy,
             LocalDateTime endTime,
             BigDecimal penalties,
-            int freeMinutes
+            int maxDurationHours
     ) {
         return new BillingRequest(
                 sessionId,
@@ -162,17 +152,16 @@ class BillingControllerTariffRepositoryIntegrationTest {
                 occupancy,
                 endTime,
                 penalties,
-                freeMinutes
+                maxDurationHours
         );
     }
 
     // TIT-01: Standard zone tariff retrieval
     @Test
     @DisplayName("TIT-01: Should retrieve STANDARD tariff from repository for STANDARD zone")
-    void testCalculateBill_StandardZone_StandardTariffRetrieved() {
-        // Arrange
+    void testCalculateBillStandardZoneStandardTariffRetrieved() {
         BillingRequest request = createRequest(
-                "session-001",
+                "S1",
                 ZoneType.STANDARD,
                 DayType.WEEKDAY,
                 TimeOfDayBand.OFF_PEAK,
@@ -182,10 +171,8 @@ class BillingControllerTariffRepositoryIntegrationTest {
                 24
         );
 
-        // Act
         billingController.calculateBill(request);
 
-        // Assert - Verify STANDARD tariff was passed to billing service
         verify(billingService, times(1)).calculateBill(
                 any(),
                 any(),
@@ -206,10 +193,9 @@ class BillingControllerTariffRepositoryIntegrationTest {
     // TIT-02: EV zone tariff retrieval
     @Test
     @DisplayName("TIT-02: Should retrieve EV tariff from repository for EV zone")
-    void testCalculateBill_EVZone_EVTariffRetrieved() {
-        // Arrange
+    void testCalculateBillEVZoneEVTariffRetrieved() {
         BillingRequest request = createRequest(
-                "session-001",
+                "S2",
                 ZoneType.EV,
                 DayType.WEEKDAY,
                 TimeOfDayBand.OFF_PEAK,
@@ -219,10 +205,8 @@ class BillingControllerTariffRepositoryIntegrationTest {
                 24
         );
 
-        // Act
         billingController.calculateBill(request);
 
-        // Assert - Verify EV tariff was passed to billing service
         verify(billingService, times(1)).calculateBill(
                 any(),
                 any(),
@@ -243,10 +227,9 @@ class BillingControllerTariffRepositoryIntegrationTest {
     // TIT-03: VIP zone tariff retrieval
     @Test
     @DisplayName("TIT-03: Should retrieve VIP tariff from repository for VIP zone")
-    void testCalculateBill_VIPZone_VIPTariffRetrieved() {
-        // Arrange
+    void testCalculateBillVIPZoneVIPTariffRetrieved() {
         BillingRequest request = createRequest(
-                "session-001",
+                "S3",
                 ZoneType.VIP,
                 DayType.WEEKDAY,
                 TimeOfDayBand.OFF_PEAK,
@@ -256,10 +239,8 @@ class BillingControllerTariffRepositoryIntegrationTest {
                 24
         );
 
-        // Act
         billingController.calculateBill(request);
 
-        // Assert - Verify VIP tariff was passed to billing service
         verify(billingService, times(1)).calculateBill(
                 any(),
                 any(),
@@ -277,70 +258,10 @@ class BillingControllerTariffRepositoryIntegrationTest {
         );
     }
 
-    // TIT-04: Tariff retrieved matches request zone type for multiple requests
+    // TIT-04: Tariff not found throws exception
     @Test
-    @DisplayName("TIT-04: Should always retrieve tariff matching the request zone type")
-    void testCalculateBill_MultipleRequests_CorrectTariffForEach() {
-        // STANDARD
-        BillingRequest standardRequest = createRequest(
-                "session-001",
-                ZoneType.STANDARD,
-                DayType.WEEKDAY,
-                TimeOfDayBand.OFF_PEAK,
-                0.5,
-                LocalDateTime.of(2026, 1, 15, 13, 0),
-                BigDecimal.ZERO,
-                24
-        );
-        billingController.calculateBill(standardRequest);
-
-        verify(billingService).calculateBill(
-                any(), any(), eq(ZoneType.STANDARD), any(), any(), anyDouble(),
-                same(standardTariff), any(), any(), any(), anyInt(), any(), any()
-        );
-
-        // EV
-        BillingRequest evRequest = createRequest(
-                "session-002",
-                ZoneType.EV,
-                DayType.WEEKDAY,
-                TimeOfDayBand.OFF_PEAK,
-                0.5,
-                LocalDateTime.of(2026, 1, 15, 14, 0),
-                BigDecimal.ZERO,
-                24
-        );
-        billingController.calculateBill(evRequest);
-
-        verify(billingService).calculateBill(
-                any(), any(), eq(ZoneType.EV), any(), any(), anyDouble(),
-                same(evTariff), any(), any(), any(), anyInt(), any(), any()
-        );
-
-        // VIP
-        BillingRequest vipRequest = createRequest(
-                "session-003",
-                ZoneType.VIP,
-                DayType.WEEKDAY,
-                TimeOfDayBand.OFF_PEAK,
-                0.5,
-                LocalDateTime.of(2026, 1, 15, 15, 0),
-                BigDecimal.ZERO,
-                24
-        );
-        billingController.calculateBill(vipRequest);
-
-        verify(billingService).calculateBill(
-                any(), any(), eq(ZoneType.VIP), any(), any(), anyDouble(),
-                same(vipTariff), any(), any(), any(), anyInt(), any(), any()
-        );
-    }
-
-    // TIT-05: Tariff not found throws exception
-    @Test
-    @DisplayName("TIT-05: Should throw IllegalArgumentException when tariff not found for zone type")
-    void testCalculateBill_TariffNotFound_ThrowsException() {
-        // Arrange - Create repository with missing STANDARD tariff
+    @DisplayName("TIT-04: Should throw IllegalArgumentException when tariff not found for zone type")
+    void testCalculateBillTariffNotFoundThrowsException() {
         Map<ZoneType, Tariff> incompleteTariffMap = new EnumMap<>(ZoneType.class);
         incompleteTariffMap.put(ZoneType.EV, evTariff);
         incompleteTariffMap.put(ZoneType.VIP, vipTariff);
@@ -351,7 +272,6 @@ class BillingControllerTariffRepositoryIntegrationTest {
                 billingService,
                 incompleteTariffRepository,
                 dynamicPricingConfigRepository,
-                discountPolicyRepository,
                 billingRecordRepository,
                 parkingSessionRepository,
                 penaltyHistoryRepository,
@@ -359,7 +279,7 @@ class BillingControllerTariffRepositoryIntegrationTest {
         );
 
         BillingRequest request = createRequest(
-                "session-001",
+                "S4",
                 ZoneType.STANDARD,
                 DayType.WEEKDAY,
                 TimeOfDayBand.OFF_PEAK,
@@ -369,7 +289,6 @@ class BillingControllerTariffRepositoryIntegrationTest {
                 24
         );
 
-        // Act & Assert
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
                 () -> controllerWithIncompleteTariffs.calculateBill(request)
@@ -379,40 +298,12 @@ class BillingControllerTariffRepositoryIntegrationTest {
         verifyNoInteractions(billingService);
     }
 
-    // TIT-06: Tariff object identity
+    // TIT-05: Tariff retrieval does not depend on other request parameters
     @Test
-    @DisplayName("TIT-06: Should pass the exact tariff object from repository to billing service")
-    void testCalculateBill_TariffObjectIdentity_SameObjectPassed() {
-        // Arrange
-        BillingRequest request = createRequest(
-                "session-001",
-                ZoneType.STANDARD,
-                DayType.WEEKDAY,
-                TimeOfDayBand.OFF_PEAK,
-                0.5,
-                LocalDateTime.of(2026, 1, 15, 13, 0),
-                BigDecimal.ZERO,
-                24
-        );
-
-        // Act
-        billingController.calculateBill(request);
-
-        // Assert - Verify the exact same object reference is passed
-        verify(billingService, times(1)).calculateBill(
-                any(), any(), any(), any(), any(), anyDouble(),
-                same(standardTariff),
-                any(), any(), any(), anyInt(), any(), any()
-        );
-    }
-
-    // TIT-07: Tariff retrieval does not depend on other request parameters
-    @Test
-    @DisplayName("TIT-07: Should retrieve correct tariff regardless of other request parameters")
-    void testCalculateBill_VariousRequestParams_CorrectTariffRetrieved() {
-        // EV, WEEKEND, PEAK, high occupancy
+    @DisplayName("TIT-05: Should retrieve correct tariff regardless of other request parameters")
+    void testCalculateBillVariousRequestParamsCorrectTariffRetrieved() {
         BillingRequest weekendRequest = createRequest(
-                "session-001",
+                "S5",
                 ZoneType.EV,
                 DayType.WEEKEND,
                 TimeOfDayBand.PEAK,
@@ -425,42 +316,61 @@ class BillingControllerTariffRepositoryIntegrationTest {
         billingController.calculateBill(weekendRequest);
 
         verify(billingService).calculateBill(
-                any(), any(), eq(ZoneType.EV), any(), any(), anyDouble(),
-                same(evTariff), any(), any(), any(), anyInt(), any(), any()
+                any(),
+                any(),
+                eq(ZoneType.EV),
+                any(),
+                any(),
+                anyDouble(),
+                same(evTariff),
+                any(),
+                any(),
+                any(),
+                anyInt(),
+                any(),
+                any()
         );
 
-        // VIP, HOLIDAY, OFF_PEAK, low occupancy, with penalties
         BillingRequest holidayRequest = createRequest(
-                "session-002",
+                "S6",
                 ZoneType.VIP,
                 DayType.HOLIDAY,
                 TimeOfDayBand.OFF_PEAK,
                 0.3,
                 LocalDateTime.of(2026, 12, 25, 15, 0),
-                BigDecimal.valueOf(10.00),
+                new BigDecimal("10.00"),
                 12
         );
 
         billingController.calculateBill(holidayRequest);
 
         verify(billingService).calculateBill(
-                any(), any(), eq(ZoneType.VIP), any(), any(), anyDouble(),
-                same(vipTariff), any(), any(), any(), anyInt(), any(), any()
+                any(),
+                any(),
+                eq(ZoneType.VIP),
+                any(),
+                any(),
+                anyDouble(),
+                same(vipTariff),
+                any(),
+                any(),
+                any(),
+                anyInt(),
+                any(),
+                any()
         );
     }
 
-    // TIT-08: Tariff repository called exactly once per request
+    // TIT-06: Tariff repository called exactly once per request
     @Test
-    @DisplayName("TIT-08: Should retrieve tariff from repository exactly once per billing request")
-    void testCalculateBill_RepositoryAccess_CalledOnce() {
-        // Arrange - Spy on the real repository to verify access count
+    @DisplayName("TIT-06: Should retrieve tariff from repository exactly once per billing request")
+    void testCalculateBillRepositoryAccessCalledOnce() {
         TariffRepository spyRepository = spy(tariffRepository);
 
         BillingController controllerWithSpy = new BillingController(
                 billingService,
                 spyRepository,
                 dynamicPricingConfigRepository,
-                discountPolicyRepository,
                 billingRecordRepository,
                 parkingSessionRepository,
                 penaltyHistoryRepository,
@@ -468,7 +378,7 @@ class BillingControllerTariffRepositoryIntegrationTest {
         );
 
         BillingRequest request = createRequest(
-                "session-001",
+                "S7",
                 ZoneType.STANDARD,
                 DayType.WEEKDAY,
                 TimeOfDayBand.OFF_PEAK,
@@ -478,27 +388,23 @@ class BillingControllerTariffRepositoryIntegrationTest {
                 24
         );
 
-        // Act
         controllerWithSpy.calculateBill(request);
 
-        // Assert - Verify repository accessed exactly once
         verify(spyRepository, times(1)).findByZoneType(ZoneType.STANDARD);
         verify(spyRepository, never()).findByZoneType(ZoneType.EV);
         verify(spyRepository, never()).findByZoneType(ZoneType.VIP);
     }
 
-    // TIT-09: Tariff retrieved before billing service invocation
+    // TIT-07: Tariff retrieved before billing service invocation
     @Test
-    @DisplayName("TIT-09: Should retrieve tariff from repository before calling billing service")
-    void testCalculateBill_ExecutionOrder_TariffBeforeBillingService() {
-        // Arrange
+    @DisplayName("TIT-07: Should retrieve tariff from repository before calling billing service")
+    void testCalculateBillExecutionOrderTariffBeforeBillingService() {
         TariffRepository spyRepository = spy(tariffRepository);
 
         BillingController controllerWithSpies = new BillingController(
-                billingService, // still a mock
+                billingService,
                 spyRepository,
                 dynamicPricingConfigRepository,
-                discountPolicyRepository,
                 billingRecordRepository,
                 parkingSessionRepository,
                 penaltyHistoryRepository,
@@ -506,7 +412,7 @@ class BillingControllerTariffRepositoryIntegrationTest {
         );
 
         BillingRequest request = createRequest(
-                "session-001",
+                "S8",
                 ZoneType.STANDARD,
                 DayType.WEEKDAY,
                 TimeOfDayBand.OFF_PEAK,
@@ -516,10 +422,8 @@ class BillingControllerTariffRepositoryIntegrationTest {
                 24
         );
 
-        // Act
         controllerWithSpies.calculateBill(request);
 
-        // Assert - Verify order of operations
         var inOrder = inOrder(spyRepository, billingService);
         inOrder.verify(spyRepository).findByZoneType(ZoneType.STANDARD);
         inOrder.verify(billingService).calculateBill(
@@ -528,13 +432,12 @@ class BillingControllerTariffRepositoryIntegrationTest {
         );
     }
 
-    // TIT-10: Tariff values are correctly preserved
+    // TIT-08: Tariff values are correctly preserved
     @Test
-    @DisplayName("TIT-10: Should preserve all tariff values when passing to billing service")
-    void testCalculateBill_TariffValues_AllValuesPreserved() {
-        // Arrange
+    @DisplayName("TIT-08: Should preserve all tariff values when passing to billing service")
+    void testCalculateBillTariffValuesAllValuesPreserved() {
         BillingRequest request = createRequest(
-                "session-001",
+                "S9",
                 ZoneType.VIP,
                 DayType.WEEKDAY,
                 TimeOfDayBand.OFF_PEAK,
@@ -544,10 +447,8 @@ class BillingControllerTariffRepositoryIntegrationTest {
                 24
         );
 
-        // Act
         billingController.calculateBill(request);
 
-        // Assert - Capture tariff and check fields
         ArgumentCaptor<Tariff> tariffCaptor = ArgumentCaptor.forClass(Tariff.class);
 
         verify(billingService).calculateBill(
@@ -560,9 +461,9 @@ class BillingControllerTariffRepositoryIntegrationTest {
 
         assertAll("Verify all VIP tariff properties",
                 () -> assertEquals(ZoneType.VIP, capturedTariff.getZoneType()),
-                () -> assertEquals(0, BigDecimal.valueOf(10.00).compareTo(capturedTariff.getBaseHourlyRate())),
-                () -> assertEquals(0, BigDecimal.valueOf(80.00).compareTo(capturedTariff.getDailyCap())),
-                () -> assertEquals(0, BigDecimal.valueOf(25.00).compareTo(capturedTariff.getWeekendOrHolidaySurchargePercent()))
+                () -> assertEquals(0, new BigDecimal("10.00").compareTo(capturedTariff.getBaseHourlyRate())),
+                () -> assertEquals(0, new BigDecimal("80.00").compareTo(capturedTariff.getDailyCap())),
+                () -> assertEquals(0, new BigDecimal("25.00").compareTo(capturedTariff.getWeekendOrHolidaySurchargePercent()))
         );
     }
 }
