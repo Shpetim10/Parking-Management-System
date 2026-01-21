@@ -91,7 +91,7 @@ public class Main {
         var penaltyController = new PenaltyController(penaltyService, monitoringService, penaltyRepo);
         var exitController = new ExitAuthorizationController(exitService, userRepo, sessionRepo, zoneRepo);
         var monitoringController = new MonitoringController(monitoringService, penaltyRepo, zoneRepo);
-        var discountController = new DiscountInfoController(discountRepo);
+        var discountController = new DiscountInfoController(discountRepo,subscriptionRepo);
         var userController= new UserController(userServiceImpl);
         var vehicleController= new VehicleController(vehicleService);
 
@@ -136,13 +136,13 @@ public class Main {
                 case 21 -> viewBillingRecords(billingRepo);
 
                 // FR-11, FR-2: Penalties & Blacklist
-                case 13 -> applyPenalty(penaltyController);
+                case 13 -> applyPenalty(penaltyController, userController);
                 case 16 -> viewBlacklistStatus(penaltyRepo, userRepo);
                 case 22 -> viewPenaltyHistory(penaltyRepo);
 
                 // FR-13: Monitoring & Reports
                 case 14 -> viewPenaltySummary(monitoringController);
-                case 15 -> viewZoneOccupancy(zoneRepo);
+                case 15 -> viewZoneOccupancy(occupancyService);
 
                 // FR-14: Exit authorization
                 case 17 -> exitParking(exitController);
@@ -194,8 +194,6 @@ public class Main {
         }
     }
 
-
-
     private static void updateUserStatus(UserController userController) {
         String userId = read("User ID");
         String statusStr = read("Status (ACTIVE/INACTIVE/BLACKLISTED)").toUpperCase();
@@ -210,7 +208,6 @@ public class Main {
         }
     }
 
-
     private static void updateAccountStanding(
             UserRepository userRepo,
             PenaltyHistoryRepository penaltyRepo
@@ -221,7 +218,6 @@ public class Main {
         try {
             User user = userRepo.findById(userId).orElseThrow();
             PenaltyHistory history = penaltyRepo.findById(userId);
-
 
             int penaltyCount = history.getPenaltyCount();
 
@@ -311,6 +307,7 @@ public class Main {
     }
 
 
+    // remove
     private static void updateSpotState(ParkingZoneRepository zoneRepo) {
         String zoneId = read("Zone ID");
         String spotId = read("Spot ID");
@@ -321,7 +318,6 @@ public class Main {
             SpotState state = SpotState.valueOf(stateStr);
             ParkingZone zone = zoneRepo.findById(zoneId);
 
-
             ParkingSpot spot = zone.getSpots().stream()
                     .filter(s -> s.getSpotId().equals(spotId))
                     .findFirst()
@@ -330,7 +326,6 @@ public class Main {
 
             spot.setState(state);
             zoneRepo.save(zone);
-
 
             System.out.println("✅ Spot state updated to " + state);
         } catch (Exception e) {
@@ -404,20 +399,16 @@ public class Main {
     // FR-9 & FR-10: BILLING CALCULATION
     // ============================================================
     private static void calculateBilling(BillingController billingController, InMemoryParkingSessionRepository sessionRepo, ZoneOccupancyService occupancyService) {
-        if (activeSessionId == null) {
-            System.out.println("❌ No active session");
-            return;
-        }
-
-
+       String sessionId = read("Session ID");
         try {
-            ParkingSession session = sessionRepo.findById(activeSessionId).orElseThrow();
+
+            ParkingSession session = sessionRepo.findById(sessionId).orElseThrow();
             double occupancy = occupancyService.calculateOccupancyRatioForZone(session.getZoneId());
 
 
             BillingResponse bill = billingController.calculateBill(
                     new BillingRequest(
-                            activeSessionId,
+                            sessionId,
                             session.getZoneType(),
                             session.getDayType(),
                             session.getTimeOfDayBand(),
@@ -450,21 +441,22 @@ public class Main {
         BigDecimal subscriptionPercent = readBigDecimal("Subscription discount %");
         BigDecimal promoPercent = readBigDecimal("Promo discount %");
         BigDecimal promoFixed = readBigDecimal("Promo fixed amount");
+        try{
+            discountController.saveDiscountForUser(userId,
+                    new DiscountInfoDto(subscriptionPercent, promoPercent, promoFixed, false, 0)
+            );
 
-
-        discountController.saveDiscountForUser(userId,
-                new DiscountInfoDto(subscriptionPercent, promoPercent, promoFixed, false, 0)
-        );
-
-
-        System.out.println("✅ Discount saved for user " + userId);
+            System.out.println("✅ Discount saved for user " + userId);
+        }catch(Exception e){
+            System.out.println("Error: " + e.getMessage());
+        }
     }
 
 
     // ============================================================
     // FR-11 & FR-2: PENALTIES & BLACKLIST
     // ============================================================
-    private static void applyPenalty(PenaltyController penaltyController) {
+    private static void applyPenalty(PenaltyController penaltyController, UserController userController) {
         String userId = read("User ID");
         String penaltyTypeStr = read("Penalty type (OVERSTAY/LOST_TICKET/MISUSE)").toUpperCase();
         BigDecimal amount = readBigDecimal("Penalty amount");
@@ -472,7 +464,6 @@ public class Main {
 
         try {
             PenaltyType type = PenaltyType.valueOf(penaltyTypeStr);
-
 
             ApplyPenaltyResponseDto res =
                     penaltyController.applyPenalty(
@@ -488,6 +479,9 @@ public class Main {
             System.out.println("⚠️ Penalty applied");
             System.out.println("   Blacklist status: " + res.blacklistStatus());
 
+            if (res.blacklistStatus() == BlacklistStatus.BLACKLISTED) {
+                userController.updateUser(userId, "BLACKLISTED");
+            }
 
         } catch (Exception e) {
             System.out.println("❌ Error: " + e.getMessage());
@@ -549,30 +543,17 @@ public class Main {
     }
 
 
-    private static void viewZoneOccupancy(ParkingZoneRepository zoneRepo) {
+    private static void viewZoneOccupancy(ZoneOccupancyService zoneOccupancyService) {
         String zoneId = read("Zone ID");
 
 
         try {
-            ParkingZone zone = zoneRepo.findById(zoneId);
 
-
-            int total = zone.getSpots().size();
-            long occupied = zone.getSpots().stream()
-                    .filter(s -> s.getState() == SpotState.OCCUPIED)
-                    .count();
-
-
-            double ratio = total == 0 ? 0.0 : (double) occupied / total;
-
+            double ratio= zoneOccupancyService.calculateOccupancyRatioForZone(zoneId);
 
             System.out.println("📍 ZONE OCCUPANCY");
             System.out.println("   Zone ID: " + zoneId);
-            System.out.println("   Total spots: " + total);
-            System.out.println("   Occupied spots: " + occupied);
             System.out.printf("   Occupancy ratio: %.1f%%%n", ratio * 100);
-
-
         } catch (Exception e) {
             System.out.println("❌ Zone not found");
         }
@@ -742,8 +723,28 @@ public class Main {
 
     private static void registerSubscription(InMemorySubscriptionPlanRepository subscriptionRepo) {
         String userId = read("User ID");
-        subscriptionRepo.save(userId, defaultPlan());
-        System.out.println("✅ Subscription registered for " + userId);
+        int choice = readInt("Subscription choice (1-Standard/2- Ev/3- Vip)");
+
+        switch (choice) {
+            case 1:
+                subscriptionRepo.save(userId,SubscriptionPlan.defaultPlan());
+                System.out.println("✅ Subscription registered for " + userId);
+                break;
+
+            case 2:
+                subscriptionRepo.save(userId,SubscriptionPlan.evZonePlan());
+                System.out.println("✅ Subscription registered for " + userId);
+                break;
+
+            case 3:
+                subscriptionRepo.save(userId,SubscriptionPlan.vipZonePlan());
+                System.out.println("✅ Subscription registered for " + userId);
+                break;
+
+            default:
+                System.out.println("This plan does not exist! ");
+                break;
+        }
     }
 
 
@@ -781,26 +782,20 @@ public class Main {
     private static void seedUsersAndVehicles(UserRepository userRepo, VehicleRepository vehicleRepo, InMemorySubscriptionPlanRepository subscriptionRepo) {
         userRepo.save(new User("U1", UserStatus.ACTIVE));
         vehicleRepo.save(new Vehicle("AA-111", "U1"));
-        subscriptionRepo.save("U1", defaultPlan());
+        subscriptionRepo.save("U1", SubscriptionPlan.defaultPlan());
 
 
         userRepo.save(new User("U2", UserStatus.ACTIVE));
         vehicleRepo.save(new Vehicle("EV-222", "U2"));
-        subscriptionRepo.save("U2", defaultPlan());
+        subscriptionRepo.save("U2", SubscriptionPlan.defaultPlan());
 
 
         userRepo.save(new User("U3", UserStatus.ACTIVE));
         vehicleRepo.save(new Vehicle("VIP-333", "U3"));
-        subscriptionRepo.save("U3", defaultPlan());
+        subscriptionRepo.save("U3", SubscriptionPlan.defaultPlan());
 
 
         System.out.println("✅ Users, vehicles & subscriptions seeded");
-    }
-
-
-    private static SubscriptionPlan defaultPlan() {
-        return new SubscriptionPlan(1, 1, 5, 8, false, false, false,
-                new DiscountInfo(new BigDecimal("0.1"), BigDecimal.ZERO, BigDecimal.ZERO, false, 0));
     }
 
 

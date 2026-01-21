@@ -29,7 +29,7 @@ public class MonitoringServiceImpl implements MonitoringService {
                 .count();
 
         return penaltiesInWindow > Settings.MAX_PENALTIES_ALLOWED
-                ? BlacklistStatus.CANDIDATE_FOR_BLACKLISTING
+                ? BlacklistStatus.BLACKLISTED
                 : BlacklistStatus.NONE;
     }
 
