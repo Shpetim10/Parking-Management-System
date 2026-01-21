@@ -1,4 +1,4 @@
-package Artjol.SystemTesting;
+package SystemTesting;
 
 import Dto.Penalty.*;
 import Enum.*;

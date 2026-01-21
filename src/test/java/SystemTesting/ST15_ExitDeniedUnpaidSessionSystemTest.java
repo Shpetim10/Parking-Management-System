@@ -1,28 +1,25 @@
-package Artjol.SystemTesting;
+package SystemTesting;
 
-import Dto.Billing.*;
 import Dto.Exit.ExitAuthorizationRequestDto;
 import Dto.Exit.ExitAuthorizationResponseDto;
 import Dto.Session.StartSessionRequestDto;
 import Dto.Zone.SpotAssignmentRequestDto;
 import Enum.*;
-import Model.ParkingSession;
 import org.junit.jupiter.api.*;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * ST-16: Session is closed after successful paid exit
+ * ST-15: Exit denied when session is unpaid
  *
  * Covers:
  * FR-14 Exit authorization
- * FR-6  Session lifecycle management
- * FR-9  Billing confirmation before exit
+ * FR-9  Billing enforcement (payment required before exit)
+ * FR-6  Session lifecycle control
  */
-class ST16_SessionClosedAfterExitSystemTest {
+class ST15_ExitDeniedUnpaidSessionSystemTest {
 
     private SystemTestFixture system;
 
@@ -33,8 +30,8 @@ class ST16_SessionClosedAfterExitSystemTest {
     }
 
     @Test
-    @DisplayName("ST-16 Session is closed after successful paid exit")
-    void sessionClosedAfterExit() {
+    @DisplayName("ST-15 Exit is denied when session is unpaid")
+    void exitDeniedWhenUnpaid() {
 
         // ===================== GIVEN =====================
         var spot = system.zoneController.assignSpot(
@@ -53,20 +50,6 @@ class ST16_SessionClosedAfterExitSystemTest {
                 )
         );
 
-        // Pay the session
-        system.billingController.calculateBill(
-                new BillingRequest(
-                        session.sessionId(),
-                        ZoneType.STANDARD,
-                        DayType.WEEKDAY,
-                        TimeOfDayBand.OFF_PEAK,
-                        0.5,
-                        LocalDateTime.now().plusHours(2),
-                        BigDecimal.ZERO,
-                        24
-                )
-        );
-
         // ===================== WHEN =====================
         ExitAuthorizationResponseDto exit =
                 system.exitController.authorizeExit(
@@ -78,15 +61,10 @@ class ST16_SessionClosedAfterExitSystemTest {
                 );
 
         // ===================== THEN =====================
-        assertTrue(exit.allowed(), "Exit must be allowed after payment");
-
-        ParkingSession closedSession =
-                system.sessionRepo.findById(session.sessionId()).orElseThrow();
-
+        assertFalse(exit.allowed(), "Exit must be denied if session is unpaid");
         assertEquals(
-                SessionState.CLOSED,
-                closedSession.getState(),
-                "Session must be CLOSED after exit"
+                ExitFailureReason.SESSION_NOT_PAID,
+                exit.reason()
         );
     }
 }

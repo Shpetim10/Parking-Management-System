@@ -1,11 +1,12 @@
-package Artjol.SystemTesting;
+package SystemTesting;
 
 import Dto.Billing.*;
 import Dto.Exit.ExitAuthorizationRequestDto;
+import Dto.Exit.ExitAuthorizationResponseDto;
 import Dto.Session.StartSessionRequestDto;
 import Dto.Zone.SpotAssignmentRequestDto;
 import Enum.*;
-import Model.ParkingSpot;
+import Model.ParkingSession;
 import org.junit.jupiter.api.*;
 
 import java.math.BigDecimal;
@@ -14,14 +15,14 @@ import java.time.LocalDateTime;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * ST-13: Parking spot is released after successful exit
+ * ST-16: Session is closed after successful paid exit
  *
  * Covers:
  * FR-14 Exit authorization
- * FR-5  Parking spot state management
- * FR-6  Session lifecycle completion
+ * FR-6  Session lifecycle management
+ * FR-9  Billing confirmation before exit
  */
-class ST13_SpotReleasedAfterExitSystemTest {
+class ST16_SessionClosedAfterExitSystemTest {
 
     private SystemTestFixture system;
 
@@ -32,8 +33,8 @@ class ST13_SpotReleasedAfterExitSystemTest {
     }
 
     @Test
-    @DisplayName("ST-13 Parking spot is released after successful exit")
-    void spotReleasedAfterExit() {
+    @DisplayName("ST-16 Session is closed after successful paid exit")
+    void sessionClosedAfterExit() {
 
         // ===================== GIVEN =====================
         var spot = system.zoneController.assignSpot(
@@ -52,7 +53,7 @@ class ST13_SpotReleasedAfterExitSystemTest {
                 )
         );
 
-        // Pay the session (required before exit)
+        // Pay the session
         system.billingController.calculateBill(
                 new BillingRequest(
                         session.sessionId(),
@@ -67,27 +68,25 @@ class ST13_SpotReleasedAfterExitSystemTest {
         );
 
         // ===================== WHEN =====================
-        system.exitController.authorizeExit(
-                new ExitAuthorizationRequestDto(
-                        "U1",
-                        session.sessionId(),
-                        "PLATE-1"
-                )
-        );
+        ExitAuthorizationResponseDto exit =
+                system.exitController.authorizeExit(
+                        new ExitAuthorizationRequestDto(
+                                "U1",
+                                session.sessionId(),
+                                "PLATE-1"
+                        )
+                );
 
         // ===================== THEN =====================
-        ParkingSpot releasedSpot =
-                system.zoneRepo.findById(spot.zoneId())
-                        .getSpots()
-                        .stream()
-                        .filter(s -> s.getSpotId().equals(spot.spotId()))
-                        .findFirst()
-                        .orElseThrow();
+        assertTrue(exit.allowed(), "Exit must be allowed after payment");
+
+        ParkingSession closedSession =
+                system.sessionRepo.findById(session.sessionId()).orElseThrow();
 
         assertEquals(
-                SpotState.FREE,
-                releasedSpot.getState(),
-                "Parking spot must be FREE after exit"
+                SessionState.CLOSED,
+                closedSession.getState(),
+                "Session must be CLOSED after exit"
         );
     }
 }

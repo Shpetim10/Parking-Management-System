@@ -1,25 +1,25 @@
-package Artjol.SystemTesting;
+package SystemTesting;
 
-import Dto.Exit.ExitAuthorizationRequestDto;
-import Dto.Exit.ExitAuthorizationResponseDto;
-import Dto.Session.StartSessionRequestDto;
+import Dto.Billing.*;
 import Dto.Zone.SpotAssignmentRequestDto;
+import Dto.Session.StartSessionRequestDto;
 import Enum.*;
 import org.junit.jupiter.api.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * ST-15: Exit denied when session is unpaid
+ * ST-12: Daily Price Cap System Test
  *
  * Covers:
- * FR-14 Exit authorization
- * FR-9  Billing enforcement (payment required before exit)
- * FR-6  Session lifecycle control
+ * FR-9  Billing calculation
+ * FR-10 Daily price cap enforcement
+ * FR-13 System-derived billing rules
  */
-class ST15_ExitDeniedUnpaidSessionSystemTest {
+class ST12_DailyCapSystemTest {
 
     private SystemTestFixture system;
 
@@ -30,13 +30,14 @@ class ST15_ExitDeniedUnpaidSessionSystemTest {
     }
 
     @Test
-    @DisplayName("ST-15 Exit is denied when session is unpaid")
-    void exitDeniedWhenUnpaid() {
+    @DisplayName("ST-12 Daily cap limits base price")
+    void dailyCapApplied() {
 
         // ===================== GIVEN =====================
         var spot = system.zoneController.assignSpot(
                 new SpotAssignmentRequestDto("U1", ZoneType.STANDARD, LocalDateTime.now())
         );
+        assertNotNull(spot);
 
         var session = system.sessionController.startSession(
                 new StartSessionRequestDto(
@@ -51,20 +52,24 @@ class ST15_ExitDeniedUnpaidSessionSystemTest {
         );
 
         // ===================== WHEN =====================
-        ExitAuthorizationResponseDto exit =
-                system.exitController.authorizeExit(
-                        new ExitAuthorizationRequestDto(
-                                "U1",
+        BillingResponse bill =
+                system.billingController.calculateBill(
+                        new BillingRequest(
                                 session.sessionId(),
-                                "PLATE-1"
+                                ZoneType.STANDARD,
+                                DayType.WEEKDAY,
+                                TimeOfDayBand.OFF_PEAK,
+                                0.5,
+                                LocalDateTime.now().plusHours(20), // very long session
+                                BigDecimal.ZERO,
+                                24
                         )
                 );
 
         // ===================== THEN =====================
-        assertFalse(exit.allowed(), "Exit must be denied if session is unpaid");
-        assertEquals(
-                ExitFailureReason.SESSION_NOT_PAID,
-                exit.reason()
+        assertTrue(
+                bill.basePrice().compareTo(BigDecimal.valueOf(25)) <= 0,
+                "Base price must not exceed daily cap"
         );
     }
 }
