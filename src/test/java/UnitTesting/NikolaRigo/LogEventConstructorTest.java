@@ -2,19 +2,16 @@ package UnitTesting.NikolaRigo;
 
 import Model.LogEvent;
 import org.junit.jupiter.api.Test;
-import java.time.Instant;
 import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.jupiter.api.Test;
-import java.time.Instant;
-import static org.junit.jupiter.api.Assertions.*;
+import java.time.LocalDateTime;
 
 class LogEventConstructorTest {
 
     @Test
     void constructor_WithValidParameters_ShouldCreateInstance() {
         // Arrange
-        Instant timestamp = Instant.now();
+        LocalDateTime timestamp = LocalDateTime.now();
         String type = "INFO";
         String details = "User logged in successfully";
 
@@ -46,7 +43,7 @@ class LogEventConstructorTest {
     @Test
     void constructor_WithNullType_ShouldThrowIllegalArgumentException() {
         // Arrange
-        Instant timestamp = Instant.now();
+        LocalDateTime timestamp = LocalDateTime.now();
         String details = "User logged in";
 
         // Act & Assert
@@ -61,7 +58,7 @@ class LogEventConstructorTest {
     @Test
     void constructor_WithNullDetails_ShouldThrowIllegalArgumentException() {
         // Arrange
-        Instant timestamp = Instant.now();
+        LocalDateTime timestamp = LocalDateTime.now();
         String type = "INFO";
 
         // Act & Assert
@@ -85,7 +82,7 @@ class LogEventConstructorTest {
     @Test
     void constructor_WithEmptyType_ShouldCreateInstance() {
         // Arrange
-        Instant timestamp = Instant.now();
+        LocalDateTime timestamp = LocalDateTime.now();
         String type = "";
         String details = "Some details";
 
@@ -100,7 +97,7 @@ class LogEventConstructorTest {
     @Test
     void constructor_WithEmptyDetails_ShouldCreateInstance() {
         // Arrange
-        Instant timestamp = Instant.now();
+        LocalDateTime timestamp = LocalDateTime.now();
         String type = "ERROR";
         String details = "";
 
@@ -115,7 +112,7 @@ class LogEventConstructorTest {
     @Test
     void constructor_WithPastTimestamp_ShouldCreateInstance() {
         // Arrange
-        Instant timestamp = Instant.parse("2020-01-01T00:00:00Z");
+        LocalDateTime timestamp = LocalDateTime.parse("2020-01-01T00:00:00Z");
         String type = "DEBUG";
         String details = "Historical log entry";
 
@@ -129,7 +126,7 @@ class LogEventConstructorTest {
     @Test
     void constructor_WithFutureTimestamp_ShouldCreateInstance() {
         // Arrange
-        Instant timestamp = Instant.parse("2030-12-31T23:59:59Z");
+        LocalDateTime timestamp = LocalDateTime.parse("2030-12-31T23:59:59Z");
         String type = "WARN";
         String details = "Scheduled event";
 
@@ -143,7 +140,7 @@ class LogEventConstructorTest {
     @Test
     void constructor_WithLongDetails_ShouldCreateInstance() {
         // Arrange
-        Instant timestamp = Instant.now();
+        LocalDateTime timestamp = LocalDateTime.now();
         String type = "ERROR";
         String details = "A".repeat(1000);
 
@@ -157,7 +154,7 @@ class LogEventConstructorTest {
     @Test
     void constructor_WithSpecialCharactersInType_ShouldCreateInstance() {
         // Arrange
-        Instant timestamp = Instant.now();
+        LocalDateTime timestamp = LocalDateTime.now();
         String type = "USER-ACTION_123!@#";
         String details = "Special event";
 
@@ -171,7 +168,7 @@ class LogEventConstructorTest {
     @Test
     void constructor_WithSpecialCharactersInDetails_ShouldCreateInstance() {
         // Arrange
-        Instant timestamp = Instant.now();
+        LocalDateTime timestamp = LocalDateTime.now();
         String type = "INFO";
         String details = "User: john@example.com | Action: login | Status: success";
 
@@ -185,7 +182,7 @@ class LogEventConstructorTest {
     @Test
     void constructor_WithWhitespaceType_ShouldCreateInstance() {
         // Arrange
-        Instant timestamp = Instant.now();
+        LocalDateTime timestamp = LocalDateTime.now();
         String type = "   ";
         String details = "Some details";
 
@@ -199,7 +196,7 @@ class LogEventConstructorTest {
     @Test
     void constructor_WithWhitespaceDetails_ShouldCreateInstance() {
         // Arrange
-        Instant timestamp = Instant.now();
+        LocalDateTime timestamp = LocalDateTime.now();
         String type = "INFO";
         String details = "   ";
 
@@ -213,7 +210,7 @@ class LogEventConstructorTest {
     @Test
     void constructor_WithDifferentLogTypes_ShouldCreateInstances() {
         // Arrange
-        Instant timestamp = Instant.now();
+        LocalDateTime timestamp = LocalDateTime.now();
         String[] types = {"INFO", "DEBUG", "WARN", "ERROR", "FATAL"};
 
         // Act & Assert
