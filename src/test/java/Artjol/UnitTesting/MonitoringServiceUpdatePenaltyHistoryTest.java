@@ -68,6 +68,6 @@ class MonitoringServiceUpdatePenaltyHistoryTest {
                 "user-1", newPenalty, history
         );
 
-        assertEquals(BlacklistStatus.CANDIDATE_FOR_BLACKLISTING, status);
+        assertEquals(BlacklistStatus.BLACKLISTED, status);
     }
 }

@@ -58,8 +58,12 @@ class ParkingSessionControllerIT {
         LocalDateTime startTime = LocalDateTime.of(2023, Month.OCTOBER, 25, 10, 0);
 
         StartSessionRequestDto request = new StartSessionRequestDto(
-                USER_ID, PLATE, ZONE_ID, SPOT_ID, ZoneType.STANDARD,
-                false, // isHoliday
+                USER_ID,
+                PLATE,
+                ZONE_ID,
+                SPOT_ID,
+                ZoneType.STANDARD,
+                false,
                 startTime
         );
 

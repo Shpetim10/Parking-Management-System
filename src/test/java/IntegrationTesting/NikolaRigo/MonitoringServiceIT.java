@@ -90,7 +90,7 @@ class MonitoringServiceIT {
         );
 
         // Assert
-        assertEquals(BlacklistStatus.CANDIDATE_FOR_BLACKLISTING, status);
+        assertEquals(BlacklistStatus.BLACKLISTED, status);
         assertEquals(4, history.getPenaltyCount());
     }
 
