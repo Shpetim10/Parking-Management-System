@@ -18,7 +18,7 @@ public class InMemoryVehicleRepository implements VehicleRepository {
 
     @Override
     public void save(Vehicle vehicle) {
-        if(exists(vehicle.getPlateNumber())) throw new IllegalArgumentException("A vegicle with this plate number already exists!");
+        if(exists(vehicle.getPlateNumber())) throw new IllegalArgumentException("A vehicle with this plate number already exists!");
         byPlate.put(vehicle.getPlateNumber(), vehicle);
     }
 

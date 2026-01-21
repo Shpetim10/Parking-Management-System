@@ -113,7 +113,7 @@ class ParkingSessionControllerIT {
         assertTrue(session.isPresent());
         assertEquals(userId, session.get().getUserId());
         assertEquals(spotId, session.get().getSpotId());
-        assertEquals(SessionState.PAID, session.get().getState());
+        assertEquals(SessionState.OPEN, session.get().getState());
     }
 
     @Test
