@@ -1,6 +1,10 @@
 package Artjol.SystemTesting;
 
 import Controller.*;
+import Dto.Session.StartSessionRequestDto;
+import Dto.Session.StartSessionResponseDto;
+import Dto.Zone.SpotAssignmentRequestDto;
+import Dto.Zone.SpotAssignmentResponseDto;
 import Enum.*;
 import Model.*;
 import Repository.*;
@@ -102,7 +106,6 @@ public class SystemTestFixture {
                     billingService,
                     tariffRepo,
                     pricingRepo,
-                    discountRepo,
                     billingRepo,
                     sessionRepo,
                     penaltyRepo,
@@ -127,15 +130,24 @@ public class SystemTestFixture {
     // ===================== SEED DATA =====================
     public void seedBaseData() {
 
-        // User + vehicle
+        // ===== USERS + VEHICLES =====
         userRepo.save(new User("U1", UserStatus.ACTIVE));
         vehicleRepo.save(new Vehicle("AA123BB", "U1"));
         subscriptionRepo.save("U1", defaultPlan());
 
-        // Zone + spot
-        ParkingZone zone =
-                new ParkingZone("Z1", ZoneType.STANDARD, 0.9);
+        userRepo.save(new User("U2", UserStatus.ACTIVE));
+        vehicleRepo.save(new Vehicle("BB234CC", "U2"));
+        subscriptionRepo.save("U2", defaultPlan());
+
+        userRepo.save(new User("U3", UserStatus.ACTIVE));
+        vehicleRepo.save(new Vehicle("CC345DD", "U3"));
+        subscriptionRepo.save("U3", defaultPlan());
+
+        // ===== ZONE + MULTIPLE SPOTS =====
+        ParkingZone zone = new ParkingZone("Z1", ZoneType.STANDARD, 0.9);
         zone.addSpot(new ParkingSpot("S1", zone));
+        zone.addSpot(new ParkingSpot("S2", zone));
+        zone.addSpot(new ParkingSpot("S3", zone));
         zoneRepo.save(zone);
     }
 
@@ -152,4 +164,51 @@ public class SystemTestFixture {
                 )
         );
     }
+
+    public ParkingSession createActiveSession(
+            String userId,
+            String vehiclePlate,
+            ZoneType zoneType
+    ) {
+        // 1️Assign parking spot
+        SpotAssignmentResponseDto assignment =
+                zoneController.assignSpot(
+                        new SpotAssignmentRequestDto(
+                                userId,
+                                zoneType,
+                                LocalDateTime.now()
+                        )
+                );
+
+        if (assignment == null) {
+            throw new IllegalStateException("No spot available for zone: " + zoneType);
+        }
+
+        // 2️Start parking session
+        StartSessionResponseDto startResponse =
+                sessionController.startSession(
+                        new StartSessionRequestDto(
+                                userId,
+                                vehiclePlate,
+                                assignment.zoneId(),
+                                assignment.spotId(),
+                                assignment.zoneType(),
+                                false,
+                                LocalDateTime.now()
+                        )
+                );
+
+        // 3️⃣ Return active session from repository
+        return sessionRepo.findById(startResponse.sessionId())
+                .orElseThrow(() ->
+                        new IllegalStateException("Session was not created properly"));
+    }
+
+    public final MonitoringController monitoringController =
+            new MonitoringController(
+                    monitoringService,
+                    penaltyRepo,
+                    zoneRepo
+            );
 }
+

@@ -1,17 +1,21 @@
 package Artjol.SystemTesting;
 
-
 import Dto.Exit.*;
-import Dto.Session.*;
-import Dto.Zone.SpotAssignmentRequestDto;
-import Dto.Zone.SpotAssignmentResponseDto;
-import Enum.*;
+import Enum.ExitFailureReason;
+import Enum.ZoneType;
+import Model.ParkingSession;
 import org.junit.jupiter.api.*;
-
-import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * ST-7: Exit Denied System Test
+ *
+ * Covers:
+ * FR-14 Exit authorization
+ * FR-6  Session lifecycle integrity
+ * FR-2  Enforcement rules
+ */
 class ST7_ExitDeniedSystemTest {
 
     private SystemTestFixture system;
@@ -23,41 +27,50 @@ class ST7_ExitDeniedSystemTest {
     }
 
     @Test
-    @DisplayName("ST-7 Exit denied due to vehicle mismatch")
-    void exitDeniedVehicleMismatch() {
+    @DisplayName("ST-7 Exit is denied when plate at gate does not match session vehicle")
+    void exitDeniedDueToPlateMismatch() {
 
-        SpotAssignmentResponseDto spot =
-                system.zoneController.assignSpot(
-                        new SpotAssignmentRequestDto(
-                                "U1",
-                                ZoneType.STANDARD,
-                                LocalDateTime.now()
-                        )
+        // GIVEN
+        ParkingSession session =
+                system.createActiveSession(
+                        "U1",
+                        "AA123BB",
+                        ZoneType.STANDARD
                 );
 
-        StartSessionResponseDto session =
-                system.sessionController.startSession(
-                        new StartSessionRequestDto(
-                                "U1",
-                                "AA123BB",
-                                spot.zoneId(),
-                                spot.spotId(),
-                                ZoneType.STANDARD,
-                                false,
-                                LocalDateTime.now()
-                        )
-                );
+        // IMPORTANT: make session payable
+                session.markPaid();
+                system.sessionRepo.save(session);
 
-        ExitAuthorizationResponseDto exit =
-                system.exitController.authorizeExit(
-                        new ExitAuthorizationRequestDto(
-                                "U1",
-                                session.sessionId(),
-                                "ZZ999ZZ" // wrong plate
-                        )
-                );
+        // WHEN
+                ExitAuthorizationResponseDto response =
+                        system.exitController.authorizeExit(
+                                new ExitAuthorizationRequestDto(
+                                        "U1",
+                                        session.getId(),
+                                        "WRONG-PLATE"
+                                )
+                        );
 
-        assertFalse(exit.allowed());
-        assertEquals(ExitFailureReason.VEHICLE_MISMATCH, exit.reason());
+        // ===================== THEN =====================
+        assertFalse(
+                response.allowed(),
+                "Exit must be denied when vehicle plate does not match"
+        );
+
+        assertEquals(
+                ExitFailureReason.VEHICLE_MISMATCH,
+                response.reason(),
+                "Exit must fail due to vehicle mismatch"
+        );
+
+        // Session must remain active
+        ParkingSession persisted =
+                system.sessionRepo.findById(session.getId()).orElseThrow();
+
+        assertTrue(
+                persisted.isActive(),
+                "Session must remain active after denied exit"
+        );
     }
 }

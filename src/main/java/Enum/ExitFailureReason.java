@@ -5,5 +5,5 @@ public enum ExitFailureReason {
     USER_INACTIVE,
     SESSION_NOT_PAID,
     ALREADY_CLOSED,
-    VEHICLE_MISMATCH
+    VEHICLE_MISMATCH;
 }
