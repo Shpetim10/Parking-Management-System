@@ -9,7 +9,6 @@ import java.util.Objects;
 import java.util.Optional;
 
 public class InMemorySubscriptionPlanRepository implements SubscriptionPlanRepository {
-    private final Map<String, SubscriptionPlan> subscriptions = new HashMap<>();
     private final Map<String, SubscriptionPlan> plansByUser = new HashMap<>();
 
     @Override

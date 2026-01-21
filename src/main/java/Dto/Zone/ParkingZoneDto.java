@@ -9,7 +9,7 @@ public class ParkingZoneDto {
 
     public ParkingZoneDto(String zoneId, String zoneType, double maxOccupancyThreshold) {
         this.zoneId = zoneId;
-        this.zoneType = ZoneType.valueOf(zoneType);
+        this.zoneType = ZoneType.valueOf(zoneType.toUpperCase());
         this.maxOccupancyThreshold = maxOccupancyThreshold;
     }
 

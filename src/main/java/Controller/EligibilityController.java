@@ -5,6 +5,7 @@ import Model.*;
 import Repository.*;
 import Service.EligibilityService;
 
+import java.util.NoSuchElementException;
 import java.util.Objects;
 
 public class EligibilityController {
@@ -29,9 +30,15 @@ public class EligibilityController {
     public EligibilityResponseDto checkEligibility(EligibilityRequestDto dto) {
         Objects.requireNonNull(dto);
 
-        User user = userRepository.findById(dto.userId()).orElseThrow();
-        Vehicle vehicle = vehicleRepository.findByPlate(dto.vehiclePlate()).orElseThrow();
-        SubscriptionPlan plan = planRepository.getPlanForUser(dto.userId()).orElseThrow();
+        User user = userRepository.findById(dto.userId())
+                .orElseThrow(() -> new NoSuchElementException("User not found: " + dto.userId()));
+
+        Vehicle vehicle = vehicleRepository.findByPlate(dto.vehiclePlate())
+                .orElseThrow(() -> new NoSuchElementException("Vehicle not found: " + dto.vehiclePlate()));
+
+        SubscriptionPlan plan = planRepository.getPlanForUser(dto.userId())
+                .orElseThrow(() -> new NoSuchElementException("No subscription plan for user: " + dto.userId()));
+
 
         EligibilityResult result = eligibilityService.canStartSession(
                 user,

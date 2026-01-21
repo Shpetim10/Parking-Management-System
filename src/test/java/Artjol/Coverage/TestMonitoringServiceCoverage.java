@@ -97,7 +97,7 @@ public class TestMonitoringServiceCoverage {
                 );
 
         assertEquals(
-                BlacklistStatus.CANDIDATE_FOR_BLACKLISTING,
+                BlacklistStatus.BLACKLISTED,
                 status
         );
     }
@@ -169,7 +169,7 @@ public class TestMonitoringServiceCoverage {
                 );
 
         assertEquals(
-                BlacklistStatus.CANDIDATE_FOR_BLACKLISTING,
+                BlacklistStatus.BLACKLISTED,
                 status
         );
     }

@@ -9,4 +9,6 @@ public interface VehicleRepository {
     Optional<Vehicle> findByPlate(String plateNumber);
 
     void save(Vehicle vehicle);
+
+    boolean exists(String plateNumber);
 }

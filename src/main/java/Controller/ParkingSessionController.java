@@ -9,6 +9,10 @@ import Model.ParkingSpot;
 import Model.ParkingZone;
 import Repository.ParkingSessionRepository;
 import Repository.ParkingZoneRepository;
+import Repository.UserRepository;
+import Service.DurationCalculator;
+import Service.EligibilityService;
+import Service.ZoneAllocationService;
 import Settings.Settings;
 
 import java.time.DayOfWeek;
@@ -21,6 +25,10 @@ public class ParkingSessionController {
 
     private final ParkingSessionRepository sessionRepo;
     private final ParkingZoneRepository zoneRepo;
+    private UserRepository userRepository;
+    private EligibilityService eligibilityService;
+    private ZoneAllocationService zoneAllocationService;
+    private DurationCalculator durationCalculator;
 
     public ParkingSessionController(ParkingSessionRepository sessionRepo, ParkingZoneRepository zoneRepo) {
         this.sessionRepo = Objects.requireNonNull(sessionRepo);
@@ -56,7 +64,6 @@ public class ParkingSessionController {
                 dto.startTime()
         );
 
-        session.markPaid();
         sessionRepo.save(session);
 
         return new StartSessionResponseDto(
@@ -105,5 +112,21 @@ public class ParkingSessionController {
         }
 
         return DayType.WEEKDAY;
+    }
+
+    public void setUserRepository(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
+    public void setEligibilityService(EligibilityService eligibilityService) {
+        this.eligibilityService = eligibilityService;
+    }
+
+    public void setZoneAllocationService(ZoneAllocationService zoneAllocationService) {
+        this.zoneAllocationService = zoneAllocationService;
+    }
+
+    public void setDurationCalculator(DurationCalculator durationCalculator) {
+        this.durationCalculator = durationCalculator;
     }
 }
