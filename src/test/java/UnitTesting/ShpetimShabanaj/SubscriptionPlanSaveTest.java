@@ -50,7 +50,7 @@ public class SubscriptionPlanSaveTest {
     @DisplayName("TC-03: Should throw NullPointerException when plan is null")
     void testSaveNullPlan() {
         assertThrows(NullPointerException.class, () ->
-                        repository.save("USER_1", null)
+                        repository.save("U1", null)
         );
     }
 
