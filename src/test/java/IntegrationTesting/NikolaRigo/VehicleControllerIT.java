@@ -93,4 +93,70 @@ class VehicleControllerIT {
 
         assertEquals("A vehicle with this plate number already exists!", exception.getMessage());
     }
+    @Test
+    void createVehicle_whenSameUserAddsMultipleVehicles_shouldSucceed() {
+        // Arrange
+        String userId = "user-1";
+        String plate1 = "CAR-001";
+        String plate2 = "CAR-002";
+
+        // Act
+        vehicleController.createVehicle(userId, plate1);
+        vehicleController.createVehicle(userId, plate2);
+
+        // Assert
+        assertTrue(vehicleRepository.exists(plate1), "First car should exist");
+        assertTrue(vehicleRepository.exists(plate2), "Second car should exist");
+
+        // Verify ownership
+        assertEquals(userId, vehicleRepository.findByPlate(plate1).get().getUserId());
+        assertEquals(userId, vehicleRepository.findByPlate(plate2).get().getUserId());
+    }
+
+    @Test
+    void createVehicle_whenPlateDiffersOnlyByCase_shouldBeTreatedAsUnique() {
+        // Arrange
+        String userId = "user-1";
+        String plateLower = "abc-123";
+        String plateUpper = "ABC-123";
+
+        // Act
+        vehicleController.createVehicle(userId, plateLower);
+        vehicleController.createVehicle(userId, plateUpper);
+
+        // Assert
+        assertTrue(vehicleRepository.exists(plateLower));
+        assertTrue(vehicleRepository.exists(plateUpper));
+
+        // They should be distinct objects
+        assertNotEquals(
+                vehicleRepository.findByPlate(plateLower).get(),
+                vehicleRepository.findByPlate(plateUpper).get()
+        );
+    }
+
+    @Test
+    void createVehicle_whenPlateIsNull_shouldThrowNullPointerException() {
+        // Arrange
+        String userId = "user-1";
+
+        // Act & Assert
+        assertThrows(NullPointerException.class, () -> {
+            vehicleController.createVehicle(userId, null);
+        });
+    }
+
+    @Test
+    void createVehicle_whenUserIdIsNull_shouldThrowUserNotFound() {
+        // Arrange
+        String plateNumber = "ABC-123";
+
+        // Act & Assert
+        // Fails because 'null' user does not exist in the repository
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            vehicleController.createVehicle(null, plateNumber);
+        });
+
+        assertEquals("User with this id does not exist!", exception.getMessage());
+    }
 }

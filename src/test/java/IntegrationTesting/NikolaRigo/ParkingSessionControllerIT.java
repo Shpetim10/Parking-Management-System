@@ -7,147 +7,205 @@ import Enum.*;
 import Model.*;
 import Repository.ParkingSessionRepository;
 import Repository.ParkingZoneRepository;
-import Repository.UserRepository;
 import Repository.impl.InMemoryParkingSessionRepository;
 import Repository.impl.InMemoryParkingZoneRepository;
-import Repository.impl.InMemoryUserRepository;
-import Service.DurationCalculator;
-import Service.EligibilityService;
-import Service.ZoneAllocationService;
-import Service.impl.DefaultDurationCalculator;
-import Service.impl.EligibilityServiceImpl;
-import Service.impl.ZoneAllocationServiceImpl;
+import Settings.Settings;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class ParkingSessionControllerIT {
 
-    private ParkingSessionController sessionController;
-    private ParkingSessionRepository sessionRepository;
-    private UserRepository userRepository;
-    private ParkingZoneRepository zoneRepository;
+    private ParkingSessionController controller;
+    private ParkingSessionRepository sessionRepo;
+    private ParkingZoneRepository zoneRepo;
 
-    // Services
-    private EligibilityService eligibilityService;
-    private ZoneAllocationService zoneAllocationService;
-    private DurationCalculator durationCalculator;
+    // Fixed ID constants for testing
+    private final String ZONE_ID = "zone-1";
+    private final String SPOT_ID = "spot-1";
+    private final String USER_ID = "user-1";
+    private final String PLATE = "ABC-123";
 
     @BeforeEach
     void setUp() {
-        // 1. Initialize Repositories
-        sessionRepository = new InMemoryParkingSessionRepository();
-        userRepository = new InMemoryUserRepository();
-        zoneRepository = new InMemoryParkingZoneRepository();
+        // 1. Initialize In-Memory Repositories
+        sessionRepo = new InMemoryParkingSessionRepository();
+        zoneRepo = new InMemoryParkingZoneRepository();
 
-        // 2. Initialize Services
-        eligibilityService = new EligibilityServiceImpl();
-        zoneAllocationService = new ZoneAllocationServiceImpl();
-        durationCalculator = new DefaultDurationCalculator();
+        // 2. Initialize Controller
+        controller = new ParkingSessionController(sessionRepo, zoneRepo);
 
-        // 3. Initialize Controller (using the 2-arg constructor you defined)
-        sessionController = new ParkingSessionController(sessionRepository, zoneRepository);
+        // 3. Seed Data: Create a Zone and a Spot
+        ParkingZone zone = new ParkingZone(ZONE_ID, ZoneType.STANDARD, 1.0);
+        ParkingSpot spot = new ParkingSpot(SPOT_ID, zone);
+        zone.addSpot(spot);
 
-        // 4. Inject Dependencies manually (via the setters we discussed)
-        sessionController.setUserRepository(userRepository);
-        sessionController.setEligibilityService(eligibilityService);
-        sessionController.setZoneAllocationService(zoneAllocationService);
-        sessionController.setDurationCalculator(durationCalculator);
-
-        // 5. Seed Data
-        seedData();
-    }
-
-    private void seedData() {
-        // Create Active User
-        userRepository.save(new User("user-active", UserStatus.ACTIVE));
-
-        // Create Standard Zone
-        ParkingZone standardZone = new ParkingZone("zone-1", ZoneType.STANDARD, 1.0);
-
-        // Create Spot and link to Zone
-        ParkingSpot spot1 = new ParkingSpot("spot-1", standardZone);
-        standardZone.addSpot(spot1);
-
-        zoneRepository.save(standardZone);
+        zoneRepo.save(zone);
     }
 
     // =========================================================================
-    // TEST CASES
+    // 1. Start Session Tests (Happy Path & Logic)
     // =========================================================================
 
     @Test
-    void startSession_whenValid_shouldSucceed() {
-        // Arrange
-        String userId = "user-active";
-        String vehiclePlate = "ABC-123";
-        String zoneId = "zone-1";
-        String spotId = "spot-1";
-        LocalDateTime now = LocalDateTime.now();
+    void startSession_whenValidRequest_shouldCreateSessionAndOccupySpot() {
+        // Arrange: Use a Standard Weekday Morning (e.g., Wed 10:00 AM)
+        LocalDateTime startTime = LocalDateTime.of(2023, Month.OCTOBER, 25, 10, 0);
 
-        // Matches your Record: (userId, plate, zoneId, spotId, type, isHoliday, startTime)
-        StartSessionRequestDto requestDto = new StartSessionRequestDto(
-                userId,
-                vehiclePlate,
-                zoneId,
-                spotId,
-                ZoneType.STANDARD,
-                false, // isHoliday
-                now    // startTime
-        );
-
-        // Act
-        StartSessionResponseDto response = sessionController.startSession(requestDto);
-
-        // Assert
-        assertNotNull(response);
-        assertNotNull(response.sessionId());
-
-        // Verify Repository State
-        Optional<ParkingSession> session = sessionRepository.findById(response.sessionId());
-        assertTrue(session.isPresent());
-        assertEquals(userId, session.get().getUserId());
-        assertEquals(spotId, session.get().getSpotId());
-        assertEquals(SessionState.PAID, session.get().getState());
-    }
-
-    @Test
-    void closeSession_shouldCalculateDurationCorrectly() {
-        // Arrange: Start a valid session
-        LocalDateTime startTime = LocalDateTime.now();
-
-        StartSessionRequestDto requestDto = new StartSessionRequestDto(
-                "user-active",
-                "ABC-123",
-                "zone-1",
-                "spot-1",
-                ZoneType.STANDARD,
+        StartSessionRequestDto request = new StartSessionRequestDto(
+                USER_ID, PLATE, ZONE_ID, SPOT_ID, ZoneType.STANDARD,
                 false, // isHoliday
                 startTime
         );
 
-        StartSessionResponseDto response = sessionController.startSession(requestDto);
-        String sessionId = response.sessionId();
+        // Act
+        StartSessionResponseDto response = controller.startSession(request);
 
-        // Act: Close the session 125 minutes later
-        // We simulate this by passing an exit time relative to the start time we just recorded
-        LocalDateTime exitTime = startTime.plusMinutes(125); // 2 hours 5 mins
+        // Assert 1: Response DTO
+        assertNotNull(response);
+        assertNotNull(response.sessionId());
+        assertEquals(SessionState.OPEN, response.state());
 
-        sessionController.closeSession(sessionId, exitTime);
+        // Assert 2: Persistence
+        Optional<ParkingSession> savedSession = sessionRepo.findById(response.sessionId());
+        assertTrue(savedSession.isPresent(), "Session should be saved to repository");
+
+        // Assert 3: Side Effect (Spot Occupancy)
+        ParkingZone zone = zoneRepo.findById(ZONE_ID);
+        ParkingSpot spot = zone.getSpots().get(0);
+        assertEquals(SpotState.OCCUPIED, spot.getState(), "Spot should be marked OCCUPIED");
+    }
+
+    @Test
+    void startSession_shouldCalculatePeakTimeCorrectly() {
+        // Arrange: Settings say Peak is 11:00 - 21:00.
+        // We test 12:00 PM (Should be PEAK)
+        LocalDateTime peakTime = LocalDateTime.of(2023, Month.OCTOBER, 25, 12, 0);
+
+        StartSessionRequestDto request = new StartSessionRequestDto(
+                USER_ID, PLATE, ZONE_ID, SPOT_ID, ZoneType.STANDARD,
+                false,
+                peakTime
+        );
+
+        // Act
+        StartSessionResponseDto response = controller.startSession(request);
 
         // Assert
-        ParkingSession closedSession = sessionRepository.findById(sessionId).get();
+        assertEquals(TimeOfDayBand.PEAK, response.timeBand());
+    }
 
-        // Verify Duration Calculation (2h 5m -> rounds up to 3 hours)
-        long minutes = Duration.between(closedSession.getStartTime(), closedSession.getEndTime()).toMinutes();
-        int calculatedHours = (int) ((minutes + 59) / 60);
+    @Test
+    void startSession_shouldCalculateOffPeakTimeCorrectly() {
+        // Arrange: Settings say Peak starts at 11:00.
+        // We test 09:00 AM (Should be OFF_PEAK)
+        LocalDateTime offPeakTime = LocalDateTime.of(2023, Month.OCTOBER, 25, 9, 0);
 
-        assertEquals(3, calculatedHours);
-        assertEquals(exitTime, closedSession.getEndTime());
+        StartSessionRequestDto request = new StartSessionRequestDto(
+                USER_ID, PLATE, ZONE_ID, SPOT_ID, ZoneType.STANDARD,
+                false,
+                offPeakTime
+        );
+
+        // Act
+        StartSessionResponseDto response = controller.startSession(request);
+
+        // Assert
+        assertEquals(TimeOfDayBand.OFF_PEAK, response.timeBand());
+    }
+
+    @Test
+    void startSession_shouldDetectWeekend() {
+        // Arrange: Oct 28, 2023 is a Saturday
+        LocalDateTime saturday = LocalDateTime.of(2023, Month.OCTOBER, 28, 12, 0);
+
+        StartSessionRequestDto request = new StartSessionRequestDto(
+                USER_ID, PLATE, ZONE_ID, SPOT_ID, ZoneType.STANDARD,
+                false,
+                saturday
+        );
+
+        // Act
+        StartSessionResponseDto response = controller.startSession(request);
+
+        // Assert
+        assertEquals(DayType.WEEKEND, response.dayType());
+    }
+
+    @Test
+    void startSession_shouldPrioritizeHolidayFlag() {
+        // Arrange: Use a normal Wednesday, but pass isHoliday = true
+        LocalDateTime wednesday = LocalDateTime.of(2023, Month.OCTOBER, 25, 12, 0);
+
+        StartSessionRequestDto request = new StartSessionRequestDto(
+                USER_ID, PLATE, ZONE_ID, SPOT_ID, ZoneType.STANDARD,
+                true, // <--- Holiday Flag
+                wednesday
+        );
+
+        // Act
+        StartSessionResponseDto response = controller.startSession(request);
+
+        // Assert
+        assertEquals(DayType.HOLIDAY, response.dayType());
+    }
+
+    // =========================================================================
+    // 2. Error Handling Tests
+    // =========================================================================
+
+    @Test
+    void startSession_whenSpotDoesNotExist_shouldThrowException() {
+        // Arrange
+        StartSessionRequestDto request = new StartSessionRequestDto(
+                USER_ID, PLATE, ZONE_ID, "INVALID-SPOT", ZoneType.STANDARD,
+                false,
+                LocalDateTime.now()
+        );
+
+        // Act & Assert
+        Exception e = assertThrows(IllegalStateException.class, () -> controller.startSession(request));
+        assertEquals("Spot not found", e.getMessage());
+    }
+
+    // =========================================================================
+    // 3. Close Session Tests
+    // =========================================================================
+
+    @Test
+    void closeSession_whenSessionExists_shouldCloseAndPersistEndTime() {
+        // Arrange: Manually seed an active session
+        String sessionId = "sess-123";
+        ParkingSession session = new ParkingSession(
+                sessionId, USER_ID, PLATE, ZONE_ID, SPOT_ID,
+                TimeOfDayBand.OFF_PEAK, DayType.WEEKDAY, ZoneType.STANDARD, LocalDateTime.now().minusHours(2)
+        );
+        sessionRepo.save(session);
+
+        LocalDateTime endTime = LocalDateTime.now();
+
+        // Act
+        boolean result = controller.closeSession(sessionId, endTime);
+
+        // Assert
+        assertTrue(result, "Should return true for successful close");
+
+        ParkingSession updatedSession = sessionRepo.findById(sessionId).orElseThrow();
+        assertEquals(SessionState.CLOSED, updatedSession.getState());
+        assertEquals(endTime, updatedSession.getEndTime());
+    }
+
+    @Test
+    void closeSession_whenSessionIdDoesNotExist_shouldReturnFalse() {
+        // Act
+        boolean result = controller.closeSession("ghost-session-id", LocalDateTime.now());
+
+        // Assert
+        assertFalse(result, "Should return false if session not found");
     }
 }
