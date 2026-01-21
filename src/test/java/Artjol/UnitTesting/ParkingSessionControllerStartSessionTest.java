@@ -61,7 +61,7 @@ class ParkingSessionControllerStartSessionTest {
 
         assertNotNull(response);
         assertNotNull(response.sessionId());
-        assertEquals(SessionState.PAID, response.state());
+        assertEquals(SessionState.OPEN, response.state());
         verify(mockSessionRepo).save(any(ParkingSession.class));
     }
 

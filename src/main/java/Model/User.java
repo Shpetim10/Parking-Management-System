@@ -6,7 +6,7 @@ import java.util.Objects;
 public class User {
 
     private final String id;
-    private final UserStatus status;
+    private UserStatus status;
 
     public User(String id, UserStatus status) {
         this.id = Objects.requireNonNull(id);
@@ -19,5 +19,9 @@ public class User {
 
     public UserStatus getStatus() {
         return status;
+    }
+
+    public void setStatus(UserStatus status) {
+        this.status = status;
     }
 }
