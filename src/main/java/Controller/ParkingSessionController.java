@@ -56,7 +56,6 @@ public class ParkingSessionController {
                 dto.startTime()
         );
 
-        session.markPaid();
         sessionRepo.save(session);
 
         return new StartSessionResponseDto(

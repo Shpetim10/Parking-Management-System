@@ -3,15 +3,13 @@ package Controller;
 import Dto.Zone.SpotAssignmentRequestDto;
 import Dto.Zone.SpotAssignmentResponseDto;
 import Exceptions.NoSpotsAvailableException;
-import Model.ParkingSpot;
-import Model.ParkingZone;
-import Model.SpotAssignmentRequest;
-import Model.SubscriptionPlan;
+import Model.*;
 import Repository.ParkingZoneRepository;
 import Repository.SubscriptionPlanRepository;
 import Service.ZoneAllocationService;
 import Service.ZoneOccupancyService;
 
+import java.util.NoSuchElementException;
 import java.util.Objects;
 
 public class ZoneAllocationController {
@@ -35,7 +33,8 @@ public class ZoneAllocationController {
     public SpotAssignmentResponseDto assignSpot(SpotAssignmentRequestDto dto){
         Objects.requireNonNull(dto);
 
-        SubscriptionPlan subscriptionPlan= subscriptionPlanRepository.getPlanForUser(dto.userId()).orElseThrow();
+        // checks also if user does not exist
+        SubscriptionPlan subscriptionPlan= subscriptionPlanRepository.getPlanForUser(dto.userId()).orElseThrow(()-> new NoSuchElementException("This user does not exist!"));
 
         SpotAssignmentRequest request = new SpotAssignmentRequest(
                 dto.userId(),

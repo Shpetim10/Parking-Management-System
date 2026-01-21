@@ -20,4 +20,9 @@ public class InMemoryUserRepository implements UserRepository {
     public void save(User user) {
         users.put(user.getId(), user);
     }
+
+    @Override
+    public boolean exists(String userId) {
+        return users.containsKey(userId);
+    }
 }
