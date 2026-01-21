@@ -30,7 +30,7 @@ class ST15_ExitDeniedUnpaidSessionSystemTest {
     }
 
     @Test
-    @DisplayName("ST-18 Exit is denied when session is unpaid")
+    @DisplayName("ST-15 Exit is denied when session is unpaid")
     void exitDeniedWhenUnpaid() {
 
         // ===================== GIVEN =====================

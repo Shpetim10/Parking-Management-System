@@ -33,7 +33,7 @@ class ST16_SessionClosedAfterExitSystemTest {
     }
 
     @Test
-    @DisplayName("ST-19 Session is closed after successful paid exit")
+    @DisplayName("ST-16 Session is closed after successful paid exit")
     void sessionClosedAfterExit() {
 
         // ===================== GIVEN =====================

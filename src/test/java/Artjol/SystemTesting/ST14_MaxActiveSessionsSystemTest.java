@@ -34,7 +34,7 @@ class ST14_MaxActiveSessionsSystemTest {
     }
 
     @Test
-    @DisplayName("ST-16 User cannot exceed max active sessions")
+    @DisplayName("ST-14 User cannot exceed max active sessions")
     void activeSessionLimitEnforced() {
 
         // ===================== GIVEN =====================

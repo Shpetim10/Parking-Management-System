@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * ST-16: Parking spot is released after successful exit
+ * ST-13: Parking spot is released after successful exit
  *
  * Covers:
  * FR-14 Exit authorization
@@ -32,7 +32,7 @@ class ST13_SpotReleasedAfterExitSystemTest {
     }
 
     @Test
-    @DisplayName("ST-20 Parking spot is released after successful exit")
+    @DisplayName("ST-13 Parking spot is released after successful exit")
     void spotReleasedAfterExit() {
 
         // ===================== GIVEN =====================

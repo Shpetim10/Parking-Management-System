@@ -31,7 +31,7 @@ class ST11_EligibilityDeniedUnpaidSessionSystemTest {
     }
 
     @Test
-    @DisplayName("ST-21 Eligibility denied when unpaid session exists")
+    @DisplayName("ST-11 Eligibility denied when unpaid session exists")
     void eligibilityDeniedForUnpaidSession() {
 
         // ===================== GIVEN =====================

@@ -30,7 +30,7 @@ class ST12_DailyCapSystemTest {
     }
 
     @Test
-    @DisplayName("ST-13 Daily cap limits base price")
+    @DisplayName("ST-12 Daily cap limits base price")
     void dailyCapApplied() {
 
         // ===================== GIVEN =====================

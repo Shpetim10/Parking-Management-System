@@ -32,7 +32,7 @@ class ST10_EligibilityDeniedInactiveUserSystemTest {
     }
 
     @Test
-    @DisplayName("ST-24 Inactive user cannot start parking session")
+    @DisplayName("ST-10 Inactive user cannot start parking session")
     void eligibilityDeniedForInactiveUser() {
 
         // ===================== GIVEN =====================
