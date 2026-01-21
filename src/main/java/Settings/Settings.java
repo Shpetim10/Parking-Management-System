@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 public final class Settings {
-    public final static BigInteger MAX_DURATION_HOURS = new BigInteger(String.valueOf(24));
+    public final static int MAX_DURATION_HOURS = 168;
     public final static BigInteger MAX_EXTRA_HOURS = new BigInteger(String.valueOf(24));
 
     public final static BigDecimal MAX_PRICE_CAPACITY = new BigDecimal(String.valueOf(1000000)); //1 million
