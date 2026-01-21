@@ -9,11 +9,9 @@ import Repository.SubscriptionPlanRepository;
 import java.util.Objects;
 
 public class DiscountInfoController {
-    private final DiscountPolicyRepository discountPolicyRepository;
     private final SubscriptionPlanRepository subscriptionPlanRepository;
 
-    public DiscountInfoController(DiscountPolicyRepository discountPolicyRepository, SubscriptionPlanRepository subscriptionPlanRepository) {
-        this.discountPolicyRepository = Objects.requireNonNull(discountPolicyRepository);
+    public DiscountInfoController(SubscriptionPlanRepository subscriptionPlanRepository) {
         this.subscriptionPlanRepository = subscriptionPlanRepository;
     }
 

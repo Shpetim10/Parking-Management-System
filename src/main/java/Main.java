@@ -91,7 +91,7 @@ public class Main {
         var penaltyController = new PenaltyController(penaltyService, monitoringService, penaltyRepo);
         var exitController = new ExitAuthorizationController(exitService, userRepo, sessionRepo, zoneRepo);
         var monitoringController = new MonitoringController(monitoringService, penaltyRepo, zoneRepo);
-        var discountController = new DiscountInfoController(discountRepo,subscriptionRepo);
+        var discountController = new DiscountInfoController(subscriptionRepo);
         var userController= new UserController(userServiceImpl);
         var vehicleController= new VehicleController(vehicleService);
 

@@ -26,7 +26,7 @@ public class DiscountInfoControllerGetDiscountForUserTest {
     void setUp() {
         repository = mock(DiscountPolicyRepository.class);
         subscriptionPlanRepository = mock(SubscriptionPlanRepository.class);
-        controller = new DiscountInfoController(repository, subscriptionPlanRepository);
+        controller = new DiscountInfoController(subscriptionPlanRepository);
     }
 
     @Test

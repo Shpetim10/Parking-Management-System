@@ -154,4 +154,81 @@ class ZoneAllocationServiceIT {
         // 1 active session / 2 total spots = 0.5
         assertEquals(0.5, ratio, 0.001);
     }
+
+    @Test
+    void calculateOccupancy_shouldIgnoreCompletedSessions() {
+        // Arrange
+        String zoneId = "zone-history";
+        ParkingZone zone = new ParkingZone(zoneId, ZoneType.STANDARD, 1.0);
+        zone.addSpot(new ParkingSpot("spot-1", zone)); // Total spots = 1
+        zoneRepository.save(zone);
+
+        // Create a session that is already CLOSED
+        ParkingSession oldSession = new ParkingSession(
+                "sess-old", "user-1", "OLD-123", zoneId, "spot-1",
+                TimeOfDayBand.OFF_PEAK, DayType.WEEKDAY, ZoneType.STANDARD,
+                LocalDateTime.now().minusHours(5)
+        );
+        // Simulate closing the session
+        oldSession.close(LocalDateTime.now().minusHours(1));
+
+        sessionRepository.save(oldSession);
+
+        // Act
+        double ratio = zoneOccupancyService.calculateOccupancyRatioForZone(zoneId);
+
+        // Assert
+        // 1 Spot, 0 Active Sessions (1 closed) -> Ratio should be 0.0
+        assertEquals(0.0, ratio, 0.001);
+    }
+
+    @Test
+    void calculateOccupancy_shouldNotCrossContaminateZones() {
+        // Arrange
+        // Zone A: Full (1 spot, 1 active session)
+        String zoneAId = "zone-A";
+        ParkingZone zoneA = new ParkingZone(zoneAId, ZoneType.STANDARD, 1.0);
+        zoneA.addSpot(new ParkingSpot("spot-a-1", zoneA));
+        zoneRepository.save(zoneA);
+
+        ParkingSession sessionA = new ParkingSession(
+                "sess-a", "user-a", "AAA-111", zoneAId, "spot-a-1",
+                TimeOfDayBand.PEAK, DayType.WEEKDAY, ZoneType.STANDARD, LocalDateTime.now()
+        );
+        sessionRepository.save(sessionA);
+
+        // Zone B: Empty (1 spot, 0 sessions)
+        String zoneBId = "zone-B";
+        ParkingZone zoneB = new ParkingZone(zoneBId, ZoneType.STANDARD, 1.0);
+        zoneB.addSpot(new ParkingSpot("spot-b-1", zoneB));
+        zoneRepository.save(zoneB);
+
+        // Act
+        double ratioA = zoneOccupancyService.calculateOccupancyRatioForZone(zoneAId);
+        double ratioB = zoneOccupancyService.calculateOccupancyRatioForZone(zoneBId);
+
+        // Assert
+        assertEquals(1.0, ratioA, 0.001, "Zone A should be full");
+        assertEquals(0.0, ratioB, 0.001, "Zone B should be empty");
+    }
+
+    @Test
+    void calculateOccupancy_shouldReturnZero_whenNoSessionsExist() {
+        // Arrange
+        String zoneId = "zone-empty";
+        // FIXED: Threshold set to 0.9 instead of invalid 1.5
+        ParkingZone zone = new ParkingZone(zoneId, ZoneType.VIP, 0.9);
+
+        // Add 5 spots
+        for (int i = 0; i < 5; i++) {
+            zone.addSpot(new ParkingSpot("spot-" + i, zone));
+        }
+        zoneRepository.save(zone);
+
+        // Act
+        double ratio = zoneOccupancyService.calculateOccupancyRatioForZone(zoneId);
+
+        // Assert
+        assertEquals(0.0, ratio, 0.001);
+    }
 }
