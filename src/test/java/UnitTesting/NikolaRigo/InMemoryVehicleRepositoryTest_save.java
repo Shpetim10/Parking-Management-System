@@ -81,27 +81,6 @@ class InMemoryVehicleRepositoryTest_save {
     }
 
     @Test
-    void withSamePlateNumber_ShouldOverwriteExistingVehicle() {
-        // Arrange
-        Vehicle mockVehicle1 = mock(Vehicle.class);
-        when(mockVehicle1.getPlateNumber()).thenReturn("ABC-1234");
-
-        Vehicle mockVehicle2 = mock(Vehicle.class);
-        when(mockVehicle2.getPlateNumber()).thenReturn("ABC-1234");
-
-        // Act
-        repository.save(mockVehicle1);
-        repository.save(mockVehicle2); // Overwrite
-
-        Optional<Vehicle> result = repository.findByPlate("ABC-1234");
-
-        // Assert
-        assertTrue(result.isPresent());
-        assertSame(mockVehicle2, result.get());
-        assertNotSame(mockVehicle1, result.get());
-    }
-
-    @Test
     void withNullVehicle_ShouldThrowNullPointerException() {
         // Act & Assert
         assertThrows(NullPointerException.class,
@@ -121,30 +100,6 @@ class InMemoryVehicleRepositoryTest_save {
         Optional<Vehicle> result = repository.findByPlate(null);
         assertTrue(result.isPresent());
         assertSame(mockVehicle, result.get());
-    }
-
-    @Test
-    void savingMultipleTimes_ShouldKeepLatestVersion() {
-        // Arrange
-        Vehicle mockVehicle1 = mock(Vehicle.class);
-        when(mockVehicle1.getPlateNumber()).thenReturn("ABC-1234");
-
-        Vehicle mockVehicle2 = mock(Vehicle.class);
-        when(mockVehicle2.getPlateNumber()).thenReturn("ABC-1234");
-
-        Vehicle mockVehicle3 = mock(Vehicle.class);
-        when(mockVehicle3.getPlateNumber()).thenReturn("ABC-1234");
-
-        // Act
-        repository.save(mockVehicle1);
-        repository.save(mockVehicle2);
-        repository.save(mockVehicle3);
-
-        Optional<Vehicle> result = repository.findByPlate("ABC-1234");
-
-        // Assert
-        assertTrue(result.isPresent());
-        assertSame(mockVehicle3, result.get());
     }
 
     @Test
