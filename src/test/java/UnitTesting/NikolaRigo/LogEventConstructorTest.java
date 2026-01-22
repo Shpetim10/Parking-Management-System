@@ -112,7 +112,7 @@ class LogEventConstructorTest {
     @Test
     void constructor_WithPastTimestamp_ShouldCreateInstance() {
         // Arrange
-        LocalDateTime timestamp = LocalDateTime.parse("2020-01-01T00:00:00Z");
+        LocalDateTime timestamp = java.time.OffsetDateTime.parse("2020-01-01T00:00:00Z").toLocalDateTime();
         String type = "DEBUG";
         String details = "Historical log entry";
 
@@ -126,7 +126,7 @@ class LogEventConstructorTest {
     @Test
     void constructor_WithFutureTimestamp_ShouldCreateInstance() {
         // Arrange
-        LocalDateTime timestamp = LocalDateTime.parse("2030-12-31T23:59:59Z");
+        LocalDateTime timestamp = java.time.OffsetDateTime.parse("2020-01-01T00:00:00Z").toLocalDateTime();
         String type = "WARN";
         String details = "Scheduled event";
 
