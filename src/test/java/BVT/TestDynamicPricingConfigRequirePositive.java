@@ -15,7 +15,23 @@ public class TestDynamicPricingConfigRequirePositive {
         );
     }
 
-    // BVT-2: invalid boundary = 0
+    // BVT-2: valid typical positive value
+    @Test
+    void testAcceptsTypicalPositiveValue() {
+        assertDoesNotThrow(() ->
+                new DynamicPricingConfig(1.5, 0.5, 1.0)
+        );
+    }
+
+    // BVT-3: valid large positive value
+    @Test
+    void testAcceptsLargePositiveValue() {
+        assertDoesNotThrow(() ->
+                new DynamicPricingConfig(100.0, 0.5, 1.0)
+        );
+    }
+
+    // BVT-4: invalid boundary = 0
     @Test
     void testRejectsZero() {
         assertThrows(IllegalArgumentException.class, () ->
@@ -23,7 +39,7 @@ public class TestDynamicPricingConfigRequirePositive {
         );
     }
 
-    // BVT-3: invalid boundary < 0
+    // BVT-5: invalid boundary < 0
     @Test
     void testRejectsNegativeValue() {
         assertThrows(IllegalArgumentException.class, () ->
@@ -31,7 +47,7 @@ public class TestDynamicPricingConfigRequirePositive {
         );
     }
 
-    // BVT-4: NaN
+    // BVT-6: invalid special value (NaN)
     @Test
     void testRejectsNaN() {
         assertThrows(IllegalArgumentException.class, () ->
@@ -39,7 +55,7 @@ public class TestDynamicPricingConfigRequirePositive {
         );
     }
 
-    // BVT-5: Infinity
+    // BVT-7: invalid special value (positive infinity)
     @Test
     void testRejectsInfinity() {
         assertThrows(IllegalArgumentException.class, () ->
@@ -47,11 +63,11 @@ public class TestDynamicPricingConfigRequirePositive {
         );
     }
 
-    // BVT-6: Negative High Occupancy
+    // BVT-8: invalid special value (negative infinity)
     @Test
-    void testRejectsNegativeHighOccupancyMultiplier() {
+    void testRejectsNegativeInfinity() {
         assertThrows(IllegalArgumentException.class, () ->
-                new DynamicPricingConfig(1.5, 0.5, -1.0)
+                new DynamicPricingConfig(Double.NEGATIVE_INFINITY, 0.5, 1.0)
         );
     }
 }
